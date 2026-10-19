@@ -1,0 +1,12 @@
+uiautomator2
+adbutils
+rich
+celery
+redis
+fastapi
+uvicorn
+schedule
+python-telegram-bot
+opencv-python
+pillow
+PyQt6

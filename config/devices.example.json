@@ -1,0 +1,11 @@
+{
+  "devices": [
+    {
+      "id": 1,
+      "name": "node-01",
+      "serial": "CIHAZ_SERI_NO",
+      "local_ip": "192.168.1.101",
+      "proxy": "socks5://user:pass@ip:port"
+    }
+  ]
+}

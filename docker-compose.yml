@@ -1,0 +1,21 @@
+version: "3.8"
+
+services:
+  redis:
+    image: redis:alpine
+    container_name: autofarm_redis
+    ports:
+      - "6379:6379"
+
+  bot_core:
+    build: .
+    container_name: autofarm_core_engine
+    restart: always
+    depends_on:
+      - redis
+    environment:
+      - REDIS_URL=redis://redis:6379/0
+    volumes:
+      - .:/app
+    devices:
+      - "/dev/bus/usb:/dev/bus/usb"

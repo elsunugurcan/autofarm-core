@@ -1,0 +1,475 @@
+[38;5;112m[Appium][0m Welcome to Appium v3.8.0 (REV cdc1ca503231b9a96da64526774915d913c3ec9f)
+[38;5;112m[Appium][0m The autodetected Appium home path: /Users/uur/.appium
+[38;5;112m[Appium][0m Attempting to load driver uiautomator2...
+[38;5;112m[Appium][0m Requiring driver at /Users/uur/.appium/node_modules/appium-uiautomator2-driver/build/lib/index.js
+[38;5;112m[Appium][0m AndroidUiautomator2Driver has been successfully loaded in 0.224s
+[38;5;112m[Appium][0m Appium REST http interface listener started on http://0.0.0.0:4723
+[38;5;112m[Appium][0m You can provide the following URLs in your client code to connect to this server:
+	http://127.0.0.1:4723/ (only accessible from the same host)
+	http://10.97.59.157:4723/
+[38;5;112m[Appium][0m Available drivers:
+[38;5;112m[Appium][0m   - uiautomator2@8.7.0 (automationName 'UiAutomator2')
+[38;5;112m[Appium][0m No plugins have been installed. Use the "appium plugin" command to install the one(s) you want to use.
+[38;5;86m[HTTP][0m Request idempotency key: 1a7b7dcd-e9cf-422f-8872-44ee6ce4e7fe
+[38;5;86m[HTTP][0m --> POST /session {"capabilities":{"firstMatch":[{}],"alwaysMatch":{"appium:automationName":"UiAutomator2","platformName":"Android","appium:deviceName":"Redmi_15C","appium:udid":"TKUW99U8QCNNJ7RC","appium:appPackage":"com.android.settings","appium:appActivity":"com.android.settings.Settings","appium:noReset":true}}}
+[38;5;180m[AppiumDriver@9ee3][0m Calling AppiumDriver.createSession() with args: [{"firstMatch":[{}],"alwaysMatch":{"appium:automationName":"UiAutomator2","platformName":"Android","appium:deviceName":"Redmi_15C","appium:udid":"TKUW99U8QCNNJ7RC","appium:appPackage":"com.android.settings","appium:appActivity":"com.android.settings.Settings","appium:noReset":true}},{"firstMatch":[{}],"alwaysMatch":{"appium:automationName":"UiAutomator2","platformName":"Android","appium:deviceName":"Redmi_15C","appium:udid":"TKUW99U8QCNNJ7RC","appium:appPackage":"com.android.settings","appium:appActivity":"com.android.settings.Settings","appium:noReset":true}},{"firstMatch":[{}],"alwaysMatch":{"appium:automationName":"UiAutomator2","platformName":"Android","appium:deviceName":"Redmi_15C","appium:udid":"TKUW99U8QCNNJ7RC","appium:appPackage":"com.android.settings","appium:appActivity":"com.android.settings.Settings","appium:noReset":true}}]
+[38;5;180m[AppiumDriver@9ee3][0m Event 'newSessionRequested' logged at 1792408907901 (14:21:47 GMT+0300 (Türkiye Standart Saati))
+[38;5;112m[Appium][0m Attempting to find matching driver for automationName 'UiAutomator2' and platformName 'Android'
+[38;5;112m[Appium][0m The 'uiautomator2' driver was installed and matched caps.
+[38;5;112m[Appium][0m Will require it at /Users/uur/.appium/node_modules/appium-uiautomator2-driver
+[38;5;112m[Appium][0m Requiring driver at /Users/uur/.appium/node_modules/appium-uiautomator2-driver/build/lib/index.js
+[38;5;180m[AppiumDriver@9ee3][0m Appium v3.8.0 creating new AndroidUiautomator2Driver (v8.7.0) session
+[38;5;180m[AppiumDriver@9ee3][0m Checking BaseDriver versions for Appium and AndroidUiautomator2Driver
+[38;5;180m[AppiumDriver@9ee3][0m Appium's BaseDriver version is 10.8.1
+[38;5;180m[AppiumDriver@9ee3][0m AndroidUiautomator2Driver's BaseDriver version is 10.8.1
+[38;5;-142m[AndroidUiautomator2Driver@0f1f][0m 
+[38;5;-142m[AndroidUiautomator2Driver@0f1f][0m Creating session with W3C capabilities: {
+  "alwaysMatch": {
+    "platformName": "Android",
+    "appium:automationName": "UiAutomator2",
+    "appium:deviceName": "Redmi_15C",
+    "appium:udid": "TKUW99U8QCNNJ7RC",
+    "appium:appPackage": "com.android.settings",
+    "appium:appActivity": "com.android.settings.Settings",
+    "appium:noReset": true
+  },
+  "firstMatch": [
+    {}
+  ]
+}
+[38;5;197m[f230ea02][0m[38;5;-142m[AndroidUiautomator2Driver@0f1f][0m Session created with session id: f230ea02-67f6-4600-bdab-5f0f3beff2fa
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Found 0 'build-tools' folders under '/Users/uur/Library/Android/sdk' (newest first):
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Using 'adb' from '/Users/uur/Library/Android/sdk/platform-tools/adb'
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Running '/Users/uur/Library/Android/sdk/platform-tools/adb -P 5037 start-server'
+[38;5;197m[f230ea02][0m[38;5;-142m[AndroidUiautomator2Driver@0f1f][0m Retrieving device list
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Trying to find connected Android devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Getting connected devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m No connected devices have been detected
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Could not find online devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Reconnecting adb (target offline)
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Running '/Users/uur/Library/Android/sdk/platform-tools/adb -P 5037 reconnect offline'
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Getting connected devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m No connected devices have been detected
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Could not find online devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Reconnecting adb (target offline)
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Running '/Users/uur/Library/Android/sdk/platform-tools/adb -P 5037 reconnect offline'
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Getting connected devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m No connected devices have been detected
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Could not find online devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Reconnecting adb (target offline)
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Running '/Users/uur/Library/Android/sdk/platform-tools/adb -P 5037 reconnect offline'
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Getting connected devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m No connected devices have been detected
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Could not find online devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Reconnecting adb (target offline)
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Running '/Users/uur/Library/Android/sdk/platform-tools/adb -P 5037 reconnect offline'
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Getting connected devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m No connected devices have been detected
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Could not find online devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Reconnecting adb (target offline)
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Running '/Users/uur/Library/Android/sdk/platform-tools/adb -P 5037 reconnect offline'
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Getting connected devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m No connected devices have been detected
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Could not find online devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Reconnecting adb (target offline)
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Running '/Users/uur/Library/Android/sdk/platform-tools/adb -P 5037 reconnect offline'
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Getting connected devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m No connected devices have been detected
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Could not find online devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Reconnecting adb (target offline)
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Running '/Users/uur/Library/Android/sdk/platform-tools/adb -P 5037 reconnect offline'
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Getting connected devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m No connected devices have been detected
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Could not find online devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Reconnecting adb (target offline)
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Running '/Users/uur/Library/Android/sdk/platform-tools/adb -P 5037 reconnect offline'
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Getting connected devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m No connected devices have been detected
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Could not find online devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Reconnecting adb (target offline)
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Running '/Users/uur/Library/Android/sdk/platform-tools/adb -P 5037 reconnect offline'
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Getting connected devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m No connected devices have been detected
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Could not find online devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Reconnecting adb (target offline)
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Running '/Users/uur/Library/Android/sdk/platform-tools/adb -P 5037 reconnect offline'
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Getting connected devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m No connected devices have been detected
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Could not find online devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Reconnecting adb (target offline)
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Running '/Users/uur/Library/Android/sdk/platform-tools/adb -P 5037 reconnect offline'
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Getting connected devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m No connected devices have been detected
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Could not find online devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Reconnecting adb (target offline)
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Running '/Users/uur/Library/Android/sdk/platform-tools/adb -P 5037 reconnect offline'
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Getting connected devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m No connected devices have been detected
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Could not find online devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Reconnecting adb (target offline)
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Running '/Users/uur/Library/Android/sdk/platform-tools/adb -P 5037 reconnect offline'
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Getting connected devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m No connected devices have been detected
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Could not find online devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Reconnecting adb (target offline)
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Running '/Users/uur/Library/Android/sdk/platform-tools/adb -P 5037 reconnect offline'
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Getting connected devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m No connected devices have been detected
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Could not find online devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Reconnecting adb (target offline)
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Running '/Users/uur/Library/Android/sdk/platform-tools/adb -P 5037 reconnect offline'
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Getting connected devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m No connected devices have been detected
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Could not find online devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Reconnecting adb (target offline)
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Running '/Users/uur/Library/Android/sdk/platform-tools/adb -P 5037 reconnect offline'
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Getting connected devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m No connected devices have been detected
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Could not find online devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Reconnecting adb (target offline)
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Running '/Users/uur/Library/Android/sdk/platform-tools/adb -P 5037 reconnect offline'
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Getting connected devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m No connected devices have been detected
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Could not find online devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Reconnecting adb (target offline)
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Running '/Users/uur/Library/Android/sdk/platform-tools/adb -P 5037 reconnect offline'
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Getting connected devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m No connected devices have been detected
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Could not find online devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Reconnecting adb (target offline)
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Running '/Users/uur/Library/Android/sdk/platform-tools/adb -P 5037 reconnect offline'
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Getting connected devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m No connected devices have been detected
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Could not find online devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Reconnecting adb (target offline)
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Running '/Users/uur/Library/Android/sdk/platform-tools/adb -P 5037 reconnect offline'
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Getting connected devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m No connected devices have been detected
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Could not find online devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Reconnecting adb (target offline)
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Running '/Users/uur/Library/Android/sdk/platform-tools/adb -P 5037 reconnect offline'
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Getting connected devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m No connected devices have been detected
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Could not find online devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Reconnecting adb (target offline)
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Running '/Users/uur/Library/Android/sdk/platform-tools/adb -P 5037 reconnect offline'
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Getting connected devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m No connected devices have been detected
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Could not find online devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Reconnecting adb (target offline)
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Running '/Users/uur/Library/Android/sdk/platform-tools/adb -P 5037 reconnect offline'
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Getting connected devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m No connected devices have been detected
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Could not find online devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Reconnecting adb (target offline)
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Running '/Users/uur/Library/Android/sdk/platform-tools/adb -P 5037 reconnect offline'
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Getting connected devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m No connected devices have been detected
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Could not find online devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Reconnecting adb (target offline)
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Running '/Users/uur/Library/Android/sdk/platform-tools/adb -P 5037 reconnect offline'
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Getting connected devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m No connected devices have been detected
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Could not find online devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Reconnecting adb (target offline)
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Running '/Users/uur/Library/Android/sdk/platform-tools/adb -P 5037 reconnect offline'
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Getting connected devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m No connected devices have been detected
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Could not find online devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Reconnecting adb (target offline)
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Running '/Users/uur/Library/Android/sdk/platform-tools/adb -P 5037 reconnect offline'
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Getting connected devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m No connected devices have been detected
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Could not find online devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Reconnecting adb (target offline)
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Running '/Users/uur/Library/Android/sdk/platform-tools/adb -P 5037 reconnect offline'
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Getting connected devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m No connected devices have been detected
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Could not find online devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Reconnecting adb (target offline)
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Running '/Users/uur/Library/Android/sdk/platform-tools/adb -P 5037 reconnect offline'
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Getting connected devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m No connected devices have been detected
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Could not find online devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Reconnecting adb (target offline)
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Running '/Users/uur/Library/Android/sdk/platform-tools/adb -P 5037 reconnect offline'
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Getting connected devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m No connected devices have been detected
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Could not find online devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Reconnecting adb (target offline)
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Running '/Users/uur/Library/Android/sdk/platform-tools/adb -P 5037 reconnect offline'
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Getting connected devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m No connected devices have been detected
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Could not find online devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Reconnecting adb (target offline)
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Running '/Users/uur/Library/Android/sdk/platform-tools/adb -P 5037 reconnect offline'
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Getting connected devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m No connected devices have been detected
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Could not find online devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Reconnecting adb (target offline)
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Running '/Users/uur/Library/Android/sdk/platform-tools/adb -P 5037 reconnect offline'
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Getting connected devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m No connected devices have been detected
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Could not find online devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Reconnecting adb (target offline)
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Running '/Users/uur/Library/Android/sdk/platform-tools/adb -P 5037 reconnect offline'
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Getting connected devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m No connected devices have been detected
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Could not find online devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Reconnecting adb (target offline)
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Running '/Users/uur/Library/Android/sdk/platform-tools/adb -P 5037 reconnect offline'
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Getting connected devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m No connected devices have been detected
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Could not find online devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Reconnecting adb (target offline)
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Running '/Users/uur/Library/Android/sdk/platform-tools/adb -P 5037 reconnect offline'
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Getting connected devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m No connected devices have been detected
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Could not find online devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Reconnecting adb (target offline)
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Running '/Users/uur/Library/Android/sdk/platform-tools/adb -P 5037 reconnect offline'
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Getting connected devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m No connected devices have been detected
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Could not find online devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Reconnecting adb (target offline)
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Running '/Users/uur/Library/Android/sdk/platform-tools/adb -P 5037 reconnect offline'
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Getting connected devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m No connected devices have been detected
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Could not find online devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Reconnecting adb (target offline)
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Running '/Users/uur/Library/Android/sdk/platform-tools/adb -P 5037 reconnect offline'
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Getting connected devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m No connected devices have been detected
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Could not find online devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Reconnecting adb (target offline)
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Running '/Users/uur/Library/Android/sdk/platform-tools/adb -P 5037 reconnect offline'
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Getting connected devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m No connected devices have been detected
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Could not find online devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Reconnecting adb (target offline)
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Running '/Users/uur/Library/Android/sdk/platform-tools/adb -P 5037 reconnect offline'
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Getting connected devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m No connected devices have been detected
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Could not find online devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Reconnecting adb (target offline)
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Running '/Users/uur/Library/Android/sdk/platform-tools/adb -P 5037 reconnect offline'
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Getting connected devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m No connected devices have been detected
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Could not find online devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Reconnecting adb (target offline)
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Running '/Users/uur/Library/Android/sdk/platform-tools/adb -P 5037 reconnect offline'
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Getting connected devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m No connected devices have been detected
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Could not find online devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Reconnecting adb (target offline)
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Running '/Users/uur/Library/Android/sdk/platform-tools/adb -P 5037 reconnect offline'
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Getting connected devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m No connected devices have been detected
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Could not find online devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Reconnecting adb (target offline)
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Running '/Users/uur/Library/Android/sdk/platform-tools/adb -P 5037 reconnect offline'
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Getting connected devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m No connected devices have been detected
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Could not find online devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Reconnecting adb (target offline)
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Running '/Users/uur/Library/Android/sdk/platform-tools/adb -P 5037 reconnect offline'
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Getting connected devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m No connected devices have been detected
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Could not find online devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Reconnecting adb (target offline)
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Running '/Users/uur/Library/Android/sdk/platform-tools/adb -P 5037 reconnect offline'
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Getting connected devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m No connected devices have been detected
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Could not find online devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Reconnecting adb (target offline)
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Running '/Users/uur/Library/Android/sdk/platform-tools/adb -P 5037 reconnect offline'
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Getting connected devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m No connected devices have been detected
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Could not find online devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Reconnecting adb (target offline)
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Running '/Users/uur/Library/Android/sdk/platform-tools/adb -P 5037 reconnect offline'
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Getting connected devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m No connected devices have been detected
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Could not find online devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Reconnecting adb (target offline)
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Running '/Users/uur/Library/Android/sdk/platform-tools/adb -P 5037 reconnect offline'
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Getting connected devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m No connected devices have been detected
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Could not find online devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Reconnecting adb (target offline)
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Running '/Users/uur/Library/Android/sdk/platform-tools/adb -P 5037 reconnect offline'
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Getting connected devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m No connected devices have been detected
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Could not find online devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Reconnecting adb (target offline)
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Running '/Users/uur/Library/Android/sdk/platform-tools/adb -P 5037 reconnect offline'
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Getting connected devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m No connected devices have been detected
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Could not find online devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Reconnecting adb (target offline)
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Running '/Users/uur/Library/Android/sdk/platform-tools/adb -P 5037 reconnect offline'
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Getting connected devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m No connected devices have been detected
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Could not find online devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Reconnecting adb (target offline)
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Running '/Users/uur/Library/Android/sdk/platform-tools/adb -P 5037 reconnect offline'
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Getting connected devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m No connected devices have been detected
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Could not find online devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Reconnecting adb (target offline)
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Running '/Users/uur/Library/Android/sdk/platform-tools/adb -P 5037 reconnect offline'
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Getting connected devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m No connected devices have been detected
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Could not find online devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Reconnecting adb (target offline)
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Running '/Users/uur/Library/Android/sdk/platform-tools/adb -P 5037 reconnect offline'
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Getting connected devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m No connected devices have been detected
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Could not find online devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Reconnecting adb (target offline)
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Running '/Users/uur/Library/Android/sdk/platform-tools/adb -P 5037 reconnect offline'
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Getting connected devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m No connected devices have been detected
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Could not find online devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Reconnecting adb (target offline)
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Running '/Users/uur/Library/Android/sdk/platform-tools/adb -P 5037 reconnect offline'
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Getting connected devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m No connected devices have been detected
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Could not find online devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Reconnecting adb (target offline)
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Running '/Users/uur/Library/Android/sdk/platform-tools/adb -P 5037 reconnect offline'
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Getting connected devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m No connected devices have been detected
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Could not find online devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Reconnecting adb (target offline)
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Running '/Users/uur/Library/Android/sdk/platform-tools/adb -P 5037 reconnect offline'
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Getting connected devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m No connected devices have been detected
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Could not find online devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Reconnecting adb (target offline)
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Running '/Users/uur/Library/Android/sdk/platform-tools/adb -P 5037 reconnect offline'
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Getting connected devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m No connected devices have been detected
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Could not find online devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Reconnecting adb (target offline)
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Running '/Users/uur/Library/Android/sdk/platform-tools/adb -P 5037 reconnect offline'
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Getting connected devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m No connected devices have been detected
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Could not find online devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Reconnecting adb (target offline)
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Running '/Users/uur/Library/Android/sdk/platform-tools/adb -P 5037 reconnect offline'
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Getting connected devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m No connected devices have been detected
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Could not find online devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Reconnecting adb (target offline)
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Running '/Users/uur/Library/Android/sdk/platform-tools/adb -P 5037 reconnect offline'
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Getting connected devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m No connected devices have been detected
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Could not find online devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Reconnecting adb (target offline)
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Running '/Users/uur/Library/Android/sdk/platform-tools/adb -P 5037 reconnect offline'
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Getting connected devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m No connected devices have been detected
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Could not find online devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Reconnecting adb (target offline)
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Running '/Users/uur/Library/Android/sdk/platform-tools/adb -P 5037 reconnect offline'
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Getting connected devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m No connected devices have been detected
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Could not find online devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Reconnecting adb (target offline)
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Running '/Users/uur/Library/Android/sdk/platform-tools/adb -P 5037 reconnect offline'
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Getting connected devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m No connected devices have been detected
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Could not find online devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Reconnecting adb (target offline)
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Running '/Users/uur/Library/Android/sdk/platform-tools/adb -P 5037 reconnect offline'
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Getting connected devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m No connected devices have been detected
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Could not find online devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Reconnecting adb (target offline)
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Running '/Users/uur/Library/Android/sdk/platform-tools/adb -P 5037 reconnect offline'
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Getting connected devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m No connected devices have been detected
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Could not find online devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Reconnecting adb (target offline)
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Running '/Users/uur/Library/Android/sdk/platform-tools/adb -P 5037 reconnect offline'
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Getting connected devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m No connected devices have been detected
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Could not find online devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Reconnecting adb (target offline)
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Running '/Users/uur/Library/Android/sdk/platform-tools/adb -P 5037 reconnect offline'
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Getting connected devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m No connected devices have been detected
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Could not find online devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Reconnecting adb (target offline)
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Running '/Users/uur/Library/Android/sdk/platform-tools/adb -P 5037 reconnect offline'
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Getting connected devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m No connected devices have been detected
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Could not find online devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Reconnecting adb (target offline)
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Running '/Users/uur/Library/Android/sdk/platform-tools/adb -P 5037 reconnect offline'
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Getting connected devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m No connected devices have been detected
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Could not find online devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Reconnecting adb (target offline)
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Running '/Users/uur/Library/Android/sdk/platform-tools/adb -P 5037 reconnect offline'
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Getting connected devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m No connected devices have been detected
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Could not find online devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Reconnecting adb (target offline)
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Running '/Users/uur/Library/Android/sdk/platform-tools/adb -P 5037 reconnect offline'
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Getting connected devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m No connected devices have been detected
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Could not find online devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Reconnecting adb (target offline)
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Running '/Users/uur/Library/Android/sdk/platform-tools/adb -P 5037 reconnect offline'
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Getting connected devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m No connected devices have been detected
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Could not find online devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Reconnecting adb (target offline)
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Running '/Users/uur/Library/Android/sdk/platform-tools/adb -P 5037 reconnect offline'
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Getting connected devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m No connected devices have been detected
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Could not find online devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Reconnecting adb (target offline)
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Running '/Users/uur/Library/Android/sdk/platform-tools/adb -P 5037 reconnect offline'
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Getting connected devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m No connected devices have been detected
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Could not find online devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Reconnecting adb (target offline)
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Running '/Users/uur/Library/Android/sdk/platform-tools/adb -P 5037 reconnect offline'
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Getting connected devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m No connected devices have been detected
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Could not find online devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Reconnecting adb (target offline)
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Running '/Users/uur/Library/Android/sdk/platform-tools/adb -P 5037 reconnect offline'
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Getting connected devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m No connected devices have been detected
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Could not find online devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Reconnecting adb (target offline)
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Running '/Users/uur/Library/Android/sdk/platform-tools/adb -P 5037 reconnect offline'
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Getting connected devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m No connected devices have been detected
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Could not find online devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Reconnecting adb (target offline)
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Running '/Users/uur/Library/Android/sdk/platform-tools/adb -P 5037 reconnect offline'
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Getting connected devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m No connected devices have been detected
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Could not find online devices
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Reconnecting adb (target offline)
+[38;5;197m[f230ea02][0m[38;5;229m[ADB][0m Running '/Users/uur/Library/Android/sdk/platform-tools/adb -P 5037 reconnect offline'
+[38;5;197m[f230ea02][0m[38;5;-142m[AndroidUiautomator2Driver@0f1f][0m Deleting UiAutomator2 session
+[38;5;197m[f230ea02][0m[38;5;180m[AppiumDriver@9ee3][0m Event 'newSessionStarted' logged at 1792408928438 (14:22:08 GMT+0300 (Türkiye Standart Saati))
+[38;5;197m[f230ea02][0m[38;5;180m[AppiumDriver@9ee3][0m Encountered internal error running command: Error: Could not find a connected Android device in 20000ms
+    at ADB.getDevicesWithRetry (file:///Users/uur/.appium/node_modules/appium-uiautomator2-driver/node_modules/appium-adb/build/lib/tools/system-calls.js:297:19)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async AndroidUiautomator2Driver.getDeviceInfoFromCaps (file:///Users/uur/.appium/node_modules/appium-uiautomator2-driver/node_modules/appium-android-driver/build/lib/commands/device/common.js:32:25)
+    at async AndroidUiautomator2Driver.createSession (file:///Users/uur/.appium/node_modules/appium-uiautomator2-driver/build/lib/driver.js:270:38)
+    at async AppiumDriver.createSession (/opt/homebrew/lib/node_modules/appium/build/lib/appium.js:266:44)
+    at async runCommandPromise (/opt/homebrew/lib/node_modules/appium/node_modules/@appium/base-driver/build/lib/basedriver/driver.js:119:24)
+    at async AppiumDriver.executeCommand (/opt/homebrew/lib/node_modules/appium/node_modules/@appium/base-driver/build/lib/basedriver/driver.js:160:15)
+    at async defaultBehavior (/opt/homebrew/lib/node_modules/appium/build/lib/appium.js:575:24)
+    at async AppiumDriver.executeWrappedCommand (/opt/homebrew/lib/node_modules/appium/build/lib/appium.js:683:22)
+    at async AppiumDriver.executeCommand (/opt/homebrew/lib/node_modules/appium/build/lib/appium.js:591:21)
+    at async asyncHandler (/opt/homebrew/lib/node_modules/appium/node_modules/@appium/base-driver/build/lib/protocol/protocol.js:393:25)
+[38;5;86m[HTTP][0m <-- POST /session 500 20540 ms - 2096

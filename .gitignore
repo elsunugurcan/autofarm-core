@@ -1,0 +1,13 @@
+.DS_Store
+apks/*.apk
+config/proxies.json
+config/devices.json
+.env
+logs/
+*.db
+*.sqlite3
+venv/
+__pycache__/
+node_modules/
+bin/
+obj/
