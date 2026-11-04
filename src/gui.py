@@ -7,23 +7,50 @@ from PyQt6.QtWidgets import (
     QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
     QPushButton, QLabel, QTableWidget, QTableWidgetItem, QTextEdit,
     QStackedWidget, QHeaderView, QLineEdit, QComboBox, QMessageBox,
-    QFrame, QGridLayout, QSplitter
+    QFrame
 )
 from PyQt6.QtCore import Qt, QThread, pyqtSignal
-from PyQt6.QtGui import QFont, QColor
+from PyQt6.QtGui import QColor
 
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 from database import init_db
 from manager_agent import ManagerAgent
+from humanizer import Humanizer, Persona
+from campaign_manager import CampaignDistributor
 
 DB_PATH = "autofarm.db"
+
+
+def ensure_30_nodes_config():
+    os.makedirs("config", exist_ok=True)
+    config_path = "config/devices.json"
+    devices = []
+    if os.path.exists(config_path):
+        try:
+            with open(config_path, "r") as f:
+                devices = json.load(f).get("devices", [])
+        except Exception:
+            devices = []
+    if len(devices) < 30:
+        devices = []
+        for i in range(1, 31):
+            serial = "TKUW99U8QCNNJ7RC" if i == 1 else f"BEKLIYOR_NODE_{i:02d}"
+            devices.append({
+                "id": i,
+                "name": f"node-{i:02d}",
+                "serial": serial,
+                "local_ip": f"192.168.1.{100+i}",
+                "proxy": f"socks5://user:pass@127.0.0.1:{1080+i}"
+            })
+        with open(config_path, "w") as f:
+            json.dump({"devices": devices}, f, indent=2)
 
 
 class BotRunnerThread(QThread):
     log_signal = pyqtSignal(str)
 
     def run(self):
-        self.log_signal.emit("[ENGINE] Paralel gorev ve simulasyon motoru baslatildi...")
+        self.log_signal.emit("[ENGINE] 🚀 Kampanya ve Biyometrik görev motoru başlatıldı...")
         process = subprocess.Popen(
             [sys.executable, "src/runner.py"],
             stdout=subprocess.PIPE,
@@ -35,7 +62,7 @@ class BotRunnerThread(QThread):
                 self.log_signal.emit(line.strip())
         process.stdout.close()
         process.wait()
-        self.log_signal.emit("[ENGINE] Tum gorev dongusu tamamlandi.")
+        self.log_signal.emit("[ENGINE] ✅ Tüm biyometrik görev döngüsü tamamlandı.")
 
 
 class StatCard(QFrame):
@@ -59,21 +86,21 @@ class StatCard(QFrame):
         lbl_title.setStyleSheet("color: #71717a; font-size: 11px; font-weight: 700; letter-spacing: 0.8px; border: none; background: transparent;")
 
         self.lbl_value = QLabel(value)
-        self.lbl_value.setStyleSheet(f"color: #f4f4f5; font-size: 26px; font-weight: 800; border: none; background: transparent;")
+        self.lbl_value.setStyleSheet("color: #f4f4f5; font-size: 24px; font-weight: 800; border: none; background: transparent;")
 
-        lbl_sub = QLabel(subtitle)
-        lbl_sub.setStyleSheet(f"color: {accent_color}; font-size: 11px; font-weight: 600; border: none; background: transparent;")
+        self.lbl_sub = QLabel(subtitle)
+        self.lbl_sub.setStyleSheet(f"color: {accent_color}; font-size: 11px; font-weight: 600; border: none; background: transparent;")
 
         layout.addWidget(lbl_title)
         layout.addWidget(self.lbl_value)
-        layout.addWidget(lbl_sub)
+        layout.addWidget(self.lbl_sub)
 
 
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("AutoFarm-30 // Enterprise Command Center")
-        self.setGeometry(80, 60, 1480, 880)
+        self.setWindowTitle("AutoFarm-30 // Enterprise Biometric Command Center")
+        self.setGeometry(60, 40, 1520, 920)
 
         self.setStyleSheet("""
             QMainWindow, QWidget {
@@ -85,8 +112,8 @@ class MainWindow(QMainWindow):
             #Sidebar {
                 background-color: #0e0e12;
                 border-right: 1px solid #1f1f26;
-                min-width: 250px;
-                max-width: 250px;
+                min-width: 255px;
+                max-width: 255px;
             }
             #BrandBox {
                 background-color: #14141b;
@@ -136,29 +163,13 @@ class MainWindow(QMainWindow):
                 background-color: #272733;
                 border-color: #38bdf8;
             }
-            QPushButton#BtnEmerald {
-                background-color: #059669;
-                color: #ffffff;
-                border: 1px solid #10b981;
-            }
+            QPushButton#BtnEmerald { background-color: #059669; color: #ffffff; border: 1px solid #10b981; }
             QPushButton#BtnEmerald:hover { background-color: #10b981; }
-            QPushButton#BtnIndigo {
-                background-color: #4f46e5;
-                color: #ffffff;
-                border: 1px solid #6366f1;
-            }
+            QPushButton#BtnIndigo { background-color: #4f46e5; color: #ffffff; border: 1px solid #6366f1; }
             QPushButton#BtnIndigo:hover { background-color: #6366f1; }
-            QPushButton#BtnAmber {
-                background-color: #d97706;
-                color: #ffffff;
-                border: 1px solid #f59e0b;
-            }
+            QPushButton#BtnAmber { background-color: #d97706; color: #ffffff; border: 1px solid #f59e0b; }
             QPushButton#BtnAmber:hover { background-color: #f59e0b; }
-            QPushButton#BtnRose {
-                background-color: #e11d48;
-                color: #ffffff;
-                border: 1px solid #f43f5e;
-            }
+            QPushButton#BtnRose { background-color: #e11d48; color: #ffffff; border: 1px solid #f43f5e; }
             QPushButton#BtnRose:hover { background-color: #f43f5e; }
             QTableWidget {
                 background-color: #0d0d11;
@@ -191,7 +202,9 @@ class MainWindow(QMainWindow):
             }
         """)
 
+        ensure_30_nodes_config()
         init_db()
+        CampaignDistributor.ensure_schema()
         self.nav_buttons = []
         self.init_ui()
 
@@ -207,7 +220,7 @@ class MainWindow(QMainWindow):
         sidebar.setObjectName("Sidebar")
         sb_layout = QVBoxLayout(sidebar)
         sb_layout.setContentsMargins(16, 20, 16, 20)
-        sb_layout.setSpacing(10)
+        sb_layout.setSpacing(8)
 
         brand = QFrame()
         brand.setObjectName("BrandBox")
@@ -215,19 +228,20 @@ class MainWindow(QMainWindow):
         b_layout.setContentsMargins(10, 8, 10, 8)
         b_title = QLabel("⚡ AUTOFARM-30")
         b_title.setStyleSheet("color: #38bdf8; font-size: 17px; font-weight: 900; background: transparent; border: none;")
-        b_sub = QLabel("Enterprise Fleet Suite v3.0")
+        b_sub = QLabel("Biometric Campaign Suite v4.0")
         b_sub.setStyleSheet("color: #71717a; font-size: 11px; font-weight: 600; background: transparent; border: none;")
         b_layout.addWidget(b_title)
         b_layout.addWidget(b_sub)
         sb_layout.addWidget(brand)
-        sb_layout.addSpacing(10)
+        sb_layout.addSpacing(8)
 
         menu_items = [
             ("🏠  Genel Bakış (Dashboard)", 0),
-            ("📱  Filo & Cihaz Yönetimi", 1),
-            ("🌐  Proxy & Tünel İzolasyonu", 2),
-            ("👥  Facebook Hesap CRM", 3),
-            ("🎯  Hedefli Görev & Ajan", 4),
+            ("🎯  Kampanya Dağıtıcı (30 Node)", 1),
+            ("🧬  Biyometrik Persona & DNA", 2),
+            ("📱  Filo & Cihaz Yönetimi", 3),
+            ("🌐  Proxy & Tünel İzolasyonu", 4),
+            ("👥  Facebook Hesap CRM", 5),
         ]
         for text, idx in menu_items:
             btn = QPushButton(text)
@@ -241,9 +255,9 @@ class MainWindow(QMainWindow):
         status_box = QFrame()
         status_box.setObjectName("PanelCard")
         st_layout = QVBoxLayout(status_box)
-        st_lbl1 = QLabel("🟢 SİSTEM DURUMU: AKTİF")
+        st_lbl1 = QLabel("🟢 DRIP-FEED MOTORU: AKTİF")
         st_lbl1.setStyleSheet("color: #4ade80; font-weight: 800; font-size: 11px; background: transparent; border: none;")
-        st_lbl2 = QLabel("Kapasite: 30 Fiziksel Node\nMimari: Yerel SQLite + ADB")
+        st_lbl2 = QLabel("• Rastgele Node Sıralaması\n• Organik Sandviç Oturumu\n• Pil & Sıcaklık Kalkanı")
         st_lbl2.setStyleSheet("color: #a1a1aa; font-size: 11px; background: transparent; border: none;")
         st_layout.addWidget(st_lbl1)
         st_layout.addWidget(st_lbl2)
@@ -257,41 +271,43 @@ class MainWindow(QMainWindow):
         main_v.setContentsMargins(24, 24, 24, 24)
         main_v.setSpacing(18)
 
-        # ÜST KPI KARTLARI (HER ZAMAN GÖRÜNÜR)
+        bio = Humanizer.get_circadian_status()
         kpi_layout = QHBoxLayout()
         kpi_layout.setSpacing(16)
-        self.card_nodes = StatCard("Filo Kapasitesi", "30 Node", "Yerel Ag & ADB Hazir", "#38bdf8")
-        self.card_accounts = StatCard("Kayitli FB Hesabi", "3 Aktif", "Coklu Profil Rotasyonu", "#a855f7")
-        self.card_tasks = StatCard("Bekleyen Gorevler", "0 Gorev", "Otonom Kuyruk Aktif", "#10b981")
-        self.card_health = StatCard("Tünel & Güvenlik", "%100", "Kill-Switch Korumali", "#f59e0b")
+        self.card_nodes = StatCard("Filo & Persona", "30 Node", "Her Cihazda Benzersiz DNA", "#38bdf8")
+        self.card_accounts = StatCard("Kayıtlı FB Hesabı", "3 Aktif", "Çoklu Profil Rotasyonu", "#a855f7")
+        self.card_tasks = StatCard("Kuyruktaki Görev", "0 Görev", "Drip-Feed Dalga Hazır", "#10b981")
+        self.card_bio = StatCard("Biyolojik Saat Fazı", bio["phase"], f"Aktiflik: %{int(bio['activity_prob']*100)} | Yorgunluk: x{bio['fatigue_mult']}", "#f59e0b")
 
         kpi_layout.addWidget(self.card_nodes)
         kpi_layout.addWidget(self.card_accounts)
         kpi_layout.addWidget(self.card_tasks)
-        kpi_layout.addWidget(self.card_health)
+        kpi_layout.addWidget(self.card_bio)
         main_v.addLayout(kpi_layout)
 
-        # SAYFA YIĞINI
         self.stack = QStackedWidget()
         main_v.addWidget(self.stack)
 
         self.page_dash = QWidget()
+        self.page_agent = QWidget()
+        self.page_persona = QWidget()
         self.page_fleet = QWidget()
         self.page_proxy = QWidget()
         self.page_accounts = QWidget()
-        self.page_agent = QWidget()
 
         self.init_dashboard_page()
+        self.init_agent_page()
+        self.init_persona_page()
         self.init_fleet_page()
         self.init_proxy_page()
         self.init_accounts_page()
-        self.init_agent_page()
 
         self.stack.addWidget(self.page_dash)
+        self.stack.addWidget(self.page_agent)
+        self.stack.addWidget(self.page_persona)
         self.stack.addWidget(self.page_fleet)
         self.stack.addWidget(self.page_proxy)
         self.stack.addWidget(self.page_accounts)
-        self.stack.addWidget(self.page_agent)
 
         root_layout.addWidget(main_area)
         self.refresh_kpis()
@@ -303,6 +319,8 @@ class MainWindow(QMainWindow):
             btn.style().unpolish(btn)
             btn.style().polish(btn)
         self.refresh_kpis()
+        if index == 1:
+            self.load_campaign_queue_table()
 
     def refresh_kpis(self):
         if not os.path.exists(DB_PATH):
@@ -322,7 +340,6 @@ class MainWindow(QMainWindow):
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(16)
 
-        # Hızlı Aksiyon Barı
         action_card = QFrame()
         action_card.setObjectName("PanelCard")
         act_layout = QHBoxLayout(action_card)
@@ -333,17 +350,21 @@ class MainWindow(QMainWindow):
         lbl_act.setStyleSheet("font-weight: 800; color: #f4f4f5; background: transparent; border: none;")
         act_layout.addWidget(lbl_act)
 
-        self.btn_start_bot = QPushButton("🚀 Otomasyonu / Simülasyonu Başlat")
+        self.btn_start_bot = QPushButton("🚀 Kampanya & Biyometrik Motoru Başlat")
         self.btn_start_bot.setObjectName("BtnEmerald")
         self.btn_start_bot.clicked.connect(self.start_bot_process)
         act_layout.addWidget(self.btn_start_bot)
 
-        btn_grid = QPushButton("🎛️ Tüm Ekranları Aç (Scrcpy Grid)")
-        btn_grid.setObjectName("BtnIndigo")
+        btn_go_cmp = QPushButton("🎯 Yeni 30-Node Kampanya Oluştur")
+        btn_go_cmp.setObjectName("BtnIndigo")
+        btn_go_cmp.clicked.connect(lambda: self.switch_page(1))
+        act_layout.addWidget(btn_go_cmp)
+
+        btn_grid = QPushButton("🎛️ Tüm Ekranları Aç (Scrcpy)")
         btn_grid.clicked.connect(self.open_all_scrcpy)
         act_layout.addWidget(btn_grid)
 
-        btn_tg = QPushButton("📲 Telegram Özeti Gönder")
+        btn_tg = QPushButton("📲 Telegram Özeti")
         btn_tg.setObjectName("BtnAmber")
         btn_tg.clicked.connect(self.send_telegram_alert)
         act_layout.addWidget(btn_tg)
@@ -356,19 +377,18 @@ class MainWindow(QMainWindow):
         act_layout.addStretch()
         layout.addWidget(action_card)
 
-        # Alt İkili Görünüm: Sol Canlı Terminal + Sağ Yönetici Özeti
         split_layout = QHBoxLayout()
         split_layout.setSpacing(16)
 
         log_card = QFrame()
         log_card.setObjectName("PanelCard")
         log_v = QVBoxLayout(log_card)
-        log_lbl = QLabel("🖥️ Canlı Operasyon & Telemetri Konsolu")
+        log_lbl = QLabel("🖥️ Canlı Kampanya, Sandviç Akışı & Telemetri Konsolu")
         log_lbl.setStyleSheet("font-weight: 700; color: #38bdf8; background: transparent; border: none;")
         self.log_console = QTextEdit()
         self.log_console.setReadOnly(True)
-        self.log_console.append("[SYSTEM] AutoFarm-30 Enterprise Dashboard basariyla yuklendi.")
-        self.log_console.append("[READY] Gorev motoru ve yerel veritabani senkronize.")
+        self.log_console.append("[SYSTEM] AutoFarm-30 Biometric Campaign Suite v4.0 yüklendi.")
+        self.log_console.append("[DRIP-FEED] 30 Cihazlık Zaman Yayılımlı Kampanya Dağıtıcı hazır.")
         log_v.addWidget(log_lbl)
         log_v.addWidget(self.log_console)
 
@@ -388,11 +408,219 @@ class MainWindow(QMainWindow):
         split_layout.addWidget(summary_card, 2)
         layout.addLayout(split_layout)
 
+    def init_agent_page(self):
+        layout = QVBoxLayout(self.page_agent)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(14)
+
+        form_card = QFrame()
+        form_card.setObjectName("PanelCard")
+        f_v = QVBoxLayout(form_card)
+        f_v.setContentsMargins(16, 14, 16, 14)
+        f_v.setSpacing(10)
+
+        lbl_head = QLabel("🚀 30-Cihaz Zaman Yayılımlı (Drip-Feed) Kampanya Dağıtıcı")
+        lbl_head.setStyleSheet("color: #38bdf8; font-weight: 800; font-size: 14px; border: none; background: transparent;")
+        f_v.addWidget(lbl_head)
+
+        row1 = QHBoxLayout()
+        self.input_link = QLineEdit()
+        self.input_link.setPlaceholderText("Hedef Facebook Gönderi / Reels Linki (https://www.facebook.com/...)")
+        self.input_comment = QLineEdit()
+        self.input_comment.setPlaceholderText("Yorum Konsepti (Boş bırakırsanız her cihaz kendi Persona karakterine göre özgün üretir)")
+        row1.addWidget(self.input_link, 2)
+        row1.addWidget(self.input_comment, 2)
+        f_v.addLayout(row1)
+
+        row2 = QHBoxLayout()
+        self.combo_node_count = QComboBox()
+        self.combo_node_count.addItems([
+            "5 Cihaz (Mini Dalga)",
+            "10 Cihaz (Orta Dalga)",
+            "20 Cihaz (Güçlü Dalga)",
+            "30 Cihaz (Tam Filo Ordusu)"
+        ])
+        self.combo_node_count.setCurrentIndex(1)
+
+        self.combo_mix_mode = QComboBox()
+        self.combo_mix_mode.addItems([
+            "Organik Karışım (%60 Beğeni + %40 Persona Yorum)",
+            "Tam Etkileşim (%100 Beğeni + Persona Yorum)",
+            "Sadece Beğeni (%100 Like Dalga)"
+        ])
+
+        self.combo_speed_mode = QComboBox()
+        self.combo_speed_mode.addItems([
+            "Hızlı Simülasyon (3-12 sn rastgele aralık)",
+            "Doğal Dalga (25-95 sn rastgele aralık)",
+            "Uzun Organik Yayılım (2-7 dk rastgele aralık)"
+        ])
+
+        btn_launch_cmp = QPushButton("🎯 Kampanyayı Filoya Dağıt")
+        btn_launch_cmp.setObjectName("BtnEmerald")
+        btn_launch_cmp.clicked.connect(self.launch_drip_campaign)
+
+        btn_clear_cmp = QPushButton("🧹 Tamamlananları Temizle")
+        btn_clear_cmp.clicked.connect(self.clear_completed_queue)
+
+        row2.addWidget(self.combo_node_count, 1)
+        row2.addWidget(self.combo_mix_mode, 2)
+        row2.addWidget(self.combo_speed_mode, 2)
+        row2.addWidget(btn_launch_cmp, 1)
+        row2.addWidget(btn_clear_cmp, 1)
+        f_v.addLayout(row2)
+        layout.addWidget(form_card)
+
+        self.queue_table = QTableWidget()
+        self.queue_table.setColumnCount(7)
+        self.queue_table.setHorizontalHeaderLabels([
+            "GÖREV ID", "KAMPANYA", "ATANAN CİHAZ", "PERSONA DNA",
+            "İŞLEM TİPİ", "ZAMANLAMA (DRIP-FEED)", "ÖZGÜN YORUM & DURUM"
+        ])
+        self.queue_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
+        layout.addWidget(self.queue_table)
+        self.load_campaign_queue_table()
+
+    def launch_drip_campaign(self):
+        link = self.input_link.text().strip()
+        if not link:
+            QMessageBox.warning(self, "Uyarı", "Lütfen hedef gönderi linkini girin!")
+            return
+        comment_hint = self.input_comment.text().strip()
+
+        count_map = {0: 5, 1: 10, 2: 20, 3: 30}
+        node_count = count_map.get(self.combo_node_count.currentIndex(), 10)
+
+        mix_map = {0: "ORGANIC_MIX", 1: "ALL_COMMENT", 2: "ALL_LIKE"}
+        mix_mode = mix_map.get(self.combo_mix_mode.currentIndex(), "ORGANIC_MIX")
+
+        speed_map = {0: "FAST_SIM", 1: "NATURAL_WAVE", 2: "LONG_DRIP"}
+        speed_mode = speed_map.get(self.combo_speed_mode.currentIndex(), "FAST_SIM")
+
+        cmp_code, tasks = CampaignDistributor.create_campaign(
+            post_link=link,
+            node_count=node_count,
+            mix_mode=mix_mode,
+            speed_mode=speed_mode,
+            base_comment=comment_hint
+        )
+
+        self.input_link.clear()
+        self.input_comment.clear()
+        self.load_campaign_queue_table()
+        self.refresh_agent_report()
+        self.refresh_kpis()
+        self.log_console.append(
+            f"[CAMPAIGN] 🚀 {cmp_code} oluşturuldu! {len(tasks)} cihaza rastgele sırayla ve zaman yayılımlı dağıtıldı."
+        )
+
+    def clear_completed_queue(self):
+        CampaignDistributor.clear_completed_tasks()
+        self.load_campaign_queue_table()
+        self.refresh_agent_report()
+        self.refresh_kpis()
+
+    def load_campaign_queue_table(self):
+        CampaignDistributor.ensure_schema()
+        conn = sqlite3.connect(DB_PATH)
+        c = conn.cursor()
+        c.execute(
+            """SELECT id, campaign_code, device_id, persona_name, action_type, delay_sec, comment_text, status
+               FROM targeted_tasks
+               ORDER BY status DESC, delay_sec ASC, id DESC"""
+        )
+        rows = c.fetchall()
+        conn.close()
+
+        self.queue_table.setRowCount(len(rows))
+        for r_idx, (tid, cmp_code, dev_id, p_name, act, d_sec, c_txt, st) in enumerate(rows):
+            self.queue_table.setItem(r_idx, 0, QTableWidgetItem(f"#{tid}"))
+            self.queue_table.setItem(r_idx, 1, QTableWidgetItem(str(cmp_code or "SINGLE")))
+            self.queue_table.setItem(r_idx, 2, QTableWidgetItem(f"node-{int(dev_id):02d}"))
+            self.queue_table.setItem(r_idx, 3, QTableWidgetItem(str(p_name or "Standart")))
+            self.queue_table.setItem(r_idx, 4, QTableWidgetItem("💬 YORUM + BEĞENİ" if act == "COMMENT" else "👍 SADECE BEĞENİ"))
+
+            mins, secs = divmod(int(d_sec or 0), 60)
+            time_str = f"T+{mins}dk {secs}sn" if mins > 0 else f"T+{secs}sn"
+            self.queue_table.setItem(r_idx, 5, QTableWidgetItem(time_str))
+
+            summary = f"[{st}] {c_txt}" if c_txt else f"[{st}] Organik Beğeni"
+            item_st = QTableWidgetItem(summary)
+            item_st.setForeground(QColor("#f59e0b" if st == "PENDING" else "#4ade80"))
+            self.queue_table.setItem(r_idx, 6, item_st)
+
+    def init_persona_page(self):
+        layout = QVBoxLayout(self.page_persona)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(14)
+
+        sim_card = QFrame()
+        sim_card.setObjectName("PanelCard")
+        sim_layout = QHBoxLayout(sim_card)
+        sim_layout.setContentsMargins(14, 12, 14, 12)
+
+        self.input_sim_text = QLineEdit()
+        self.input_sim_text.setPlaceholderText("Canlı Klavye & Bézier Testi için örnek yorum yazın...")
+        self.input_sim_text.setText("Harika bir paylasim olmus emeginize saglik!")
+        btn_test_sim = QPushButton("🧬 Biyometrik Simülasyonu Test Et")
+        btn_test_sim.setObjectName("BtnIndigo")
+        btn_test_sim.clicked.connect(self.run_interactive_humanizer_test)
+
+        sim_layout.addWidget(self.input_sim_text, 3)
+        sim_layout.addWidget(btn_test_sim, 1)
+        layout.addWidget(sim_card)
+
+        self.lbl_sim_output = QLabel("💡 Yukarıdaki butona basarak klavye harf hatası (⌫) ve Bézier yay koordinatlarını canlı test edebilirsiniz.")
+        self.lbl_sim_output.setStyleSheet("color: #34d399; font-family: Menlo, monospace; font-size: 12px; padding: 6px;")
+        layout.addWidget(self.lbl_sim_output)
+
+        self.persona_table = QTableWidget()
+        self.persona_table.setColumnCount(7)
+        self.persona_table.setHorizontalHeaderLabels([
+            "NODE", "KARAKTER ARKETİPİ (PERSONA)", "BAŞPARMAK YÖNÜ",
+            "HIZ ÇARPANI", "HARF HATASI (TYPO %)", "HIZLI GEÇİŞ (SKIP %)", "DOKUNMA SAPMASI (JITTER)"
+        ])
+        self.persona_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
+        layout.addWidget(self.persona_table)
+        self.load_persona_table()
+
+    def load_persona_table(self):
+        self.persona_table.setRowCount(30)
+        for i in range(1, 31):
+            p = Persona.get_for_device(i)
+            row = i - 1
+            self.persona_table.setItem(row, 0, QTableWidgetItem(f"node-{i:02d}"))
+            self.persona_table.setItem(row, 1, QTableWidgetItem(p["name"]))
+            hand = "👉 SAĞLAK (RightArc)" if p["handedness"] == "RIGHT" else "👈 SOLAK (LeftArc)"
+            self.persona_table.setItem(row, 2, QTableWidgetItem(hand))
+            self.persona_table.setItem(row, 3, QTableWidgetItem(f"x{p['speed_mult']}"))
+            self.persona_table.setItem(row, 4, QTableWidgetItem(f"%{int(p['typo_rate']*100)}"))
+            self.persona_table.setItem(row, 5, QTableWidgetItem(f"%{int(p['skip_prob']*100)}"))
+            self.persona_table.setItem(row, 6, QTableWidgetItem(f"±{p['jitter_px']} piksel"))
+
+    def run_interactive_humanizer_test(self):
+        sample = self.input_sim_text.text().strip() or "Harika paylasim!"
+        seq = Humanizer.generate_typing_sequence(sample, typo_rate=0.16)
+        stream = ""
+        typos = 0
+        for act, ch, _ in seq:
+            if act == "TYPE_WRONG":
+                stream += f"[{ch}?]"
+                typos += 1
+            elif act == "BACKSPACE":
+                stream += "⌫"
+            elif act == "TYPE_CHAR":
+                stream += ch
+        swp = Humanizer.swipe_up_feed(None, Persona.get_for_device(1))
+        self.lbl_sim_output.setText(
+            f"⌨️ Klavye Akışı ({typos} hata düzeltildi): {stream}   |   👆 Bézier Yay: {swp['start']} ➔ {swp['arc_midpoint']} ➔ {swp['end']} ({swp['duration_sec']}sn)"
+        )
+
     def init_fleet_page(self):
         layout = QVBoxLayout(self.page_fleet)
         layout.setContentsMargins(0, 0, 0, 0)
         top = QHBoxLayout()
-        lbl = QLabel("📱 Fiziksel Cihaz Filosu ve ADB Bağlantı Durumu")
+        lbl = QLabel("📱 Fiziksel Cihaz Filosu (30 Node) ve ADB Bağlantı Durumu")
         lbl.setStyleSheet("font-size: 15px; font-weight: 800; color: #38bdf8;")
         btn_ref = QPushButton("🔄 Cihazları Yeniden Tara")
         btn_ref.clicked.connect(self.load_device_table)
@@ -430,7 +658,7 @@ class MainWindow(QMainWindow):
         form_card.setObjectName("PanelCard")
         form_layout = QHBoxLayout(form_card)
         self.input_acc_device = QLineEdit()
-        self.input_acc_device.setPlaceholderText("Cihaz ID (Örn: 1)")
+        self.input_acc_device.setPlaceholderText("Cihaz ID (1-30)")
         self.input_acc_name = QLineEdit()
         self.input_acc_name.setPlaceholderText("FB Kullanıcı Adı / Etiketi")
         self.combo_acc_pkg = QComboBox()
@@ -451,31 +679,6 @@ class MainWindow(QMainWindow):
         self.acc_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
         layout.addWidget(self.acc_table)
         self.load_accounts_table()
-
-    def init_agent_page(self):
-        layout = QVBoxLayout(self.page_agent)
-        layout.setContentsMargins(0, 0, 0, 0)
-
-        form_card = QFrame()
-        form_card.setObjectName("PanelCard")
-        f_layout = QHBoxLayout(form_card)
-        self.input_link = QLineEdit()
-        self.input_link.setPlaceholderText("Hedef Gönderi Linki (https://...)")
-        self.input_comment = QLineEdit()
-        self.input_comment.setPlaceholderText("Yapılacak Yorum Metni...")
-        btn_assign = QPushButton("🎯 Görevi Kuyruğa Ekle")
-        btn_assign.setObjectName("BtnIndigo")
-        btn_assign.clicked.connect(self.assign_task)
-
-        f_layout.addWidget(self.input_link, 2)
-        f_layout.addWidget(self.input_comment, 2)
-        f_layout.addWidget(btn_assign)
-        layout.addWidget(form_card)
-
-        self.agent_console = QTextEdit()
-        self.agent_console.setReadOnly(True)
-        self.refresh_agent_report()
-        layout.addWidget(self.agent_console)
 
     def load_device_table(self):
         config_path = "config/devices.json"
@@ -543,58 +746,39 @@ class MainWindow(QMainWindow):
         self.refresh_kpis()
         self.log_console.append(f"[CRM] Yeni hesap eklendi: {username}")
 
-    def assign_task(self):
-        link = self.input_link.text().strip()
-        comment = self.input_comment.text().strip()
-        if not link:
-            return
-        conn = sqlite3.connect(DB_PATH)
-        c = conn.cursor()
-        c.execute(
-            "INSERT INTO targeted_tasks (device_id, post_link, action_type, comment_text, status) VALUES (1, ?, ?, ?, 'PENDING')",
-            (link, "COMMENT" if comment else "LIKE", comment)
-        )
-        conn.commit()
-        conn.close()
-        self.input_link.clear()
-        self.input_comment.clear()
-        self.refresh_agent_report()
-        self.refresh_kpis()
-        self.log_console.append(f"[TASK] Yeni gorev kuyruga eklendi -> {link}")
-
     def refresh_agent_report(self):
         rep = ManagerAgent.get_fleet_report()
-        self.agent_console.setPlainText(rep)
         if hasattr(self, "dash_agent_box"):
             self.dash_agent_box.setPlainText(rep)
 
     def start_bot_process(self):
         self.btn_start_bot.setEnabled(False)
-        self.log_console.append("[INFO] Gorev motoru baslatiliyor...")
+        self.log_console.append("[INFO] Kampanya & Biyometrik görev motoru başlatılıyor...")
         self.bot_thread = BotRunnerThread()
         self.bot_thread.log_signal.connect(self.append_log)
         self.bot_thread.start()
 
     def append_log(self, text):
         self.log_console.append(text)
-        if "tamamlandi" in text.lower():
+        if "tamamlandı" in text.lower() or "tamamlandi" in text.lower():
             self.btn_start_bot.setEnabled(True)
             self.refresh_agent_report()
             self.refresh_kpis()
+            self.load_campaign_queue_table()
 
     def open_all_scrcpy(self):
-        self.log_console.append("[SCRCPY] Bagli cihaz ekranlari aciliyor...")
+        self.log_console.append("[SCRCPY] Bağlı cihaz ekranları açılıyor...")
         subprocess.Popen(["scrcpy", "--max-size", "600", "--max-fps", "25"])
 
     def send_telegram_alert(self):
         from telegram_alerts import TelegramAlerts
         TelegramAlerts.send_mission_report(45, 0)
-        self.log_console.append("[TELEGRAM] Operasyon ozeti gonderildi.")
+        self.log_console.append("[TELEGRAM] Operasyon özeti gönderildi.")
 
     def trigger_kill_switch(self):
         from kill_switch import KillSwitch
         KillSwitch.emergency_stop_device("NODE-01")
-        self.log_console.append("[KILL-SWITCH] Acil ag izolasyonu devreye alindi!")
+        self.log_console.append("[KILL-SWITCH] Acil ağ izolasyonu devreye alındı!")
 
 
 if __name__ == "__main__":
