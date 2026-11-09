@@ -1,788 +1,1250 @@
-import sys
-import os
-import json
-import sqlite3
-import subprocess
-from PyQt6.QtWidgets import (
-    QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
-    QPushButton, QLabel, QTableWidget, QTableWidgetItem, QTextEdit,
-    QStackedWidget, QHeaderView, QLineEdit, QComboBox, QMessageBox,
-    QFrame
+import sys, os, json, subprocess, threading, time, random, sqlite3
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+sys.path.insert(0, os.path.abspath("."))
+
+import tkinter as tk
+from tkinter import ttk
+import customtkinter as ctk
+
+from core_engine import (
+    PROF_FILE, DB_FILE, GROUPS_FILE, PAGES_FILE, PERSONAS,
+    load_json, save_json, lock_portrait_mode,
+    mute_device_audio, wake_and_home, home_and_sleep, check_vpn_and_temp
 )
-from PyQt6.QtCore import Qt, QThread, pyqtSignal
-from PyQt6.QtGui import QColor
 
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
-from database import init_db
-from manager_agent import ManagerAgent
-from humanizer import Humanizer, Persona
-from campaign_manager import CampaignDistributor
+ctk.set_appearance_mode("Dark")
+ctk.set_default_color_theme("blue")
 
-DB_PATH = "autofarm.db"
+def get_profiles():
+    default = {
+        f"NODE-{i:02d}": {
+            "fb_name": f"FB Hesap {i:02d}",
+            "proxy": f"socks5://user:pass@127.0.0.1:{1080+i}",
+            "persona": PERSONAS[(i - 1) % len(PERSONAS)]
+        } for i in range(1, 31)
+    }
+    data = load_json(PROF_FILE, default)
+    for i in range(1, 31):
+        k = f"NODE-{i:02d}"
+        if k not in data:
+            data[k] = default[k]
+        elif "persona" not in data[k]:
+            data[k]["persona"] = PERSONAS[(i - 1) % len(PERSONAS)]
+    return data
 
-
-def ensure_30_nodes_config():
-    os.makedirs("config", exist_ok=True)
-    config_path = "config/devices.json"
-    devices = []
-    if os.path.exists(config_path):
-        try:
-            with open(config_path, "r") as f:
-                devices = json.load(f).get("devices", [])
-        except Exception:
-            devices = []
-    if len(devices) < 30:
-        devices = []
-        for i in range(1, 31):
-            serial = "TKUW99U8QCNNJ7RC" if i == 1 else f"BEKLIYOR_NODE_{i:02d}"
-            devices.append({
-                "id": i,
-                "name": f"node-{i:02d}",
-                "serial": serial,
-                "local_ip": f"192.168.1.{100+i}",
-                "proxy": f"socks5://user:pass@127.0.0.1:{1080+i}"
-            })
-        with open(config_path, "w") as f:
-            json.dump({"devices": devices}, f, indent=2)
-
-
-class BotRunnerThread(QThread):
-    log_signal = pyqtSignal(str)
-
-    def run(self):
-        self.log_signal.emit("[ENGINE] 🚀 Kampanya ve Biyometrik görev motoru başlatıldı...")
-        process = subprocess.Popen(
-            [sys.executable, "src/runner.py"],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT,
-            text=True
-        )
-        for line in iter(process.stdout.readline, ""):
-            if line:
-                self.log_signal.emit(line.strip())
-        process.stdout.close()
-        process.wait()
-        self.log_signal.emit("[ENGINE] ✅ Tüm biyometrik görev döngüsü tamamlandı.")
-
-
-class StatCard(QFrame):
-    def __init__(self, title, value, subtitle, accent_color="#38bdf8"):
-        super().__init__()
-        self.setObjectName("StatCard")
-        self.setStyleSheet(f"""
-            QFrame#StatCard {{
-                background-color: #121217;
-                border: 1px solid #232329;
-                border-top: 3px solid {accent_color};
-                border-radius: 12px;
-                padding: 14px;
-            }}
-        """)
-        layout = QVBoxLayout(self)
-        layout.setContentsMargins(12, 10, 12, 10)
-        layout.setSpacing(4)
-
-        lbl_title = QLabel(title.upper())
-        lbl_title.setStyleSheet("color: #71717a; font-size: 11px; font-weight: 700; letter-spacing: 0.8px; border: none; background: transparent;")
-
-        self.lbl_value = QLabel(value)
-        self.lbl_value.setStyleSheet("color: #f4f4f5; font-size: 24px; font-weight: 800; border: none; background: transparent;")
-
-        self.lbl_sub = QLabel(subtitle)
-        self.lbl_sub.setStyleSheet(f"color: {accent_color}; font-size: 11px; font-weight: 600; border: none; background: transparent;")
-
-        layout.addWidget(lbl_title)
-        layout.addWidget(self.lbl_value)
-        layout.addWidget(self.lbl_sub)
-
-
-class MainWindow(QMainWindow):
+class AutoFarmModernCommandCenter(ctk.CTk):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("AutoFarm-30 // Enterprise Biometric Command Center")
-        self.setGeometry(60, 40, 1520, 920)
+        self.title("AutoFarm-30 // Enterprise Biometric Command Center v7.0")
+        self.geometry("1620x950")
+        self.configure(fg_color="#090d16")
 
-        self.setStyleSheet("""
-            QMainWindow, QWidget {
-                background-color: #09090b;
-                color: #e4e4e7;
-                font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-                font-size: 13px;
-            }
-            #Sidebar {
-                background-color: #0e0e12;
-                border-right: 1px solid #1f1f26;
-                min-width: 255px;
-                max-width: 255px;
-            }
-            #BrandBox {
-                background-color: #14141b;
-                border: 1px solid #262633;
-                border-radius: 12px;
-                padding: 12px;
-            }
-            QPushButton#NavBtn {
-                background-color: transparent;
-                color: #a1a1aa;
-                border: 1px solid transparent;
-                text-align: left;
-                padding: 12px 16px;
-                border-radius: 10px;
-                font-weight: 600;
-                font-size: 13px;
-            }
-            QPushButton#NavBtn:hover {
-                background-color: #16161e;
-                color: #ffffff;
-                border: 1px solid #272732;
-            }
-            QPushButton#NavBtnActive {
-                background-color: #1d283a;
-                color: #38bdf8;
-                border: 1px solid #0284c7;
-                text-align: left;
-                padding: 12px 16px;
-                border-radius: 10px;
-                font-weight: 700;
-                font-size: 13px;
-            }
-            QFrame#PanelCard {
-                background-color: #121217;
-                border: 1px solid #232329;
-                border-radius: 12px;
-            }
-            QPushButton {
-                background-color: #18181f;
-                color: #f4f4f5;
-                border: 1px solid #2e2e38;
-                padding: 10px 18px;
-                border-radius: 8px;
-                font-weight: 700;
-            }
-            QPushButton:hover {
-                background-color: #272733;
-                border-color: #38bdf8;
-            }
-            QPushButton#BtnEmerald { background-color: #059669; color: #ffffff; border: 1px solid #10b981; }
-            QPushButton#BtnEmerald:hover { background-color: #10b981; }
-            QPushButton#BtnIndigo { background-color: #4f46e5; color: #ffffff; border: 1px solid #6366f1; }
-            QPushButton#BtnIndigo:hover { background-color: #6366f1; }
-            QPushButton#BtnAmber { background-color: #d97706; color: #ffffff; border: 1px solid #f59e0b; }
-            QPushButton#BtnAmber:hover { background-color: #f59e0b; }
-            QPushButton#BtnRose { background-color: #e11d48; color: #ffffff; border: 1px solid #f43f5e; }
-            QPushButton#BtnRose:hover { background-color: #f43f5e; }
-            QTableWidget {
-                background-color: #0d0d11;
-                gridline-color: #1e1e26;
-                border: 1px solid #232329;
-                border-radius: 10px;
-                color: #e4e4e7;
-                selection-background-color: #1d4ed8;
-            }
-            QHeaderView::section {
-                background-color: #16161d;
-                color: #9ca3af;
-                padding: 10px;
-                border: none;
-                border-bottom: 1px solid #272730;
-                font-weight: 700;
-                font-size: 11px;
-            }
-            QTextEdit, QLineEdit, QComboBox {
-                background-color: #0b0b0e;
-                color: #34d399;
-                border: 1px solid #252530;
-                border-radius: 8px;
-                font-family: "Menlo", "Monaco", "Courier New", monospace;
-                padding: 10px;
-                font-size: 12px;
-            }
-            QLineEdit:focus, QComboBox:focus {
-                border: 1px solid #38bdf8;
-            }
-        """)
+        self.profiles = get_profiles()
+        self.saved_groups = load_json(GROUPS_FILE, [
+            {"name": "Örnek Grup 1", "url": "https://www.facebook.com/groups/ornek1", "selected": True}
+        ])
+        self.saved_pages = load_json(PAGES_FILE, [
+            {"name": "Ana Sayfamız", "url": "https://www.facebook.com/ornek_sayfa", "selected": True}
+        ])
 
-        ensure_30_nodes_config()
-        init_db()
-        CampaignDistributor.ensure_schema()
-        self.nav_buttons = []
-        self.init_ui()
+        self.scrcpy_procs = {}
+        self.active_proc = None
+        self.row_widgets = {}
+        self.group_btn_vars = []
+        self.page_btn_vars = []
+        self.comment_counter = 1
+        self.sidebar_expanded = True
+        self.console_expanded = True
 
-    def init_ui(self):
-        central = QWidget()
-        self.setCentralWidget(central)
-        root_layout = QHBoxLayout(central)
-        root_layout.setContentsMargins(0, 0, 0, 0)
-        root_layout.setSpacing(0)
+        self.setup_treeview_style()
+        self.build_layout()
+        self.refresh_devices()
+        self.refresh_queue_table()
+        self.refresh_watched_list_ui()
 
-        # SOL SIDEBAR
-        sidebar = QFrame()
-        sidebar.setObjectName("Sidebar")
-        sb_layout = QVBoxLayout(sidebar)
-        sb_layout.setContentsMargins(16, 20, 16, 20)
-        sb_layout.setSpacing(8)
+        self.after(4000, self.periodic_ui_sync)
+        self.after(6000, self.auto_warmup_on_startup)
 
-        brand = QFrame()
-        brand.setObjectName("BrandBox")
-        b_layout = QVBoxLayout(brand)
-        b_layout.setContentsMargins(10, 8, 10, 8)
-        b_title = QLabel("⚡ AUTOFARM-30")
-        b_title.setStyleSheet("color: #38bdf8; font-size: 17px; font-weight: 900; background: transparent; border: none;")
-        b_sub = QLabel("Biometric Campaign Suite v4.0")
-        b_sub.setStyleSheet("color: #71717a; font-size: 11px; font-weight: 600; background: transparent; border: none;")
-        b_layout.addWidget(b_title)
-        b_layout.addWidget(b_sub)
-        sb_layout.addWidget(brand)
-        sb_layout.addSpacing(8)
+    def setup_treeview_style(self):
+        style = ttk.Style()
+        style.theme_use("clam")
+        style.configure(
+            "Treeview",
+            background="#111827",
+            foreground="#e2e8f0",
+            fieldbackground="#111827",
+            rowheight=28,
+            borderwidth=0,
+            font=("Segoe UI", 9)
+        )
+        style.configure(
+            "Treeview.Heading",
+            background="#1e293b",
+            foreground="#38bdf8",
+            borderwidth=0,
+            font=("Segoe UI", 9, "bold")
+        )
+        style.map("Treeview", background=[("selected", "#2563eb")])
 
-        menu_items = [
-            ("🏠  Genel Bakış (Dashboard)", 0),
-            ("🎯  Kampanya Dağıtıcı (30 Node)", 1),
-            ("🧬  Biyometrik Persona & DNA", 2),
-            ("📱  Filo & Cihaz Yönetimi", 3),
-            ("🌐  Proxy & Tünel İzolasyonu", 4),
-            ("👥  Facebook Hesap CRM", 5),
+    def build_layout(self):
+        self.grid_columnconfigure(1, weight=1)
+        self.grid_rowconfigure(0, weight=1)
+
+        # SOL ACILIR / KAPANIR NAVIGASYON SIDEBAR
+        self.sidebar = ctk.CTkFrame(self, width=255, corner_radius=0, fg_color="#0f1523")
+        self.sidebar.grid(row=0, column=0, sticky="nsew")
+        self.sidebar.grid_propagate(False)
+
+        brand_row = ctk.CTkFrame(self.sidebar, fg_color="transparent")
+        brand_row.pack(fill="x", padx=14, pady=(14, 8))
+
+        ctk.CTkButton(
+            brand_row, text="☰", width=34, height=34, corner_radius=8,
+            fg_color="#1e293b", hover_color="#334155", font=("Segoe UI", 15, "bold"),
+            command=self.toggle_sidebar
+        ).pack(side="left")
+
+        self.lbl_brand_title = ctk.CTkLabel(
+            brand_row, text="⚡ AUTOFARM-30", font=("Segoe UI", 16, "bold"), text_color="#38bdf8"
+        )
+        self.lbl_brand_title.pack(side="left", padx=10)
+
+        self.lbl_brand_sub = ctk.CTkLabel(
+            self.sidebar, text="Enterprise Suite v7.0 (Dikey Kilit)", font=("Segoe UI", 11), text_color="#64748b"
+        )
+        self.lbl_brand_sub.pack(anchor="w", padx=18, pady=(0, 10))
+
+        self.nav_buttons = {}
+        nav_items = [
+            ("tab_fleet", "📱  Filo Cihaz Yönetimi"),
+            ("tab_campaign", "🎯  Kampanya Dağıtıcı"),
+            ("tab_telegram", "✈️  Telegram & Grup Butonları"),
+            ("tab_pages", "📄  Sayfalar (Pages) Bölümü"),
+            ("tab_report", "🚩  Doğal Şikayet Merkezi"),
+            ("tab_watcher", "🔍  Grup & Kelime Nöbetçisi"),
+            ("tab_warmup", "🔥  Hesap Isıtma Merkezi")
         ]
-        for text, idx in menu_items:
-            btn = QPushButton(text)
-            btn.setObjectName("NavBtnActive" if idx == 0 else "NavBtn")
-            btn.clicked.connect(lambda checked, i=idx: self.switch_page(i))
-            sb_layout.addWidget(btn)
-            self.nav_buttons.append(btn)
+        for key, text in nav_items:
+            btn = ctk.CTkButton(
+                self.sidebar, text=text, anchor="w", height=36, corner_radius=8,
+                font=("Segoe UI", 12, "bold"), fg_color="transparent", text_color="#cbd5e1",
+                hover_color="#1e293b", command=lambda k=key: self.select_tab(k)
+            )
+            btn.pack(fill="x", padx=12, pady=2)
+            self.nav_buttons[key] = (btn, text)
 
-        sb_layout.addStretch()
+        # HIZLI CIHAZ EKRAN KAPATMA & DIKEY MOD KONTROLU
+        self.quick_frame = ctk.CTkFrame(self.sidebar, fg_color="#161f33", corner_radius=10)
+        self.quick_frame.pack(fill="x", padx=12, pady=10)
 
-        status_box = QFrame()
-        status_box.setObjectName("PanelCard")
-        st_layout = QVBoxLayout(status_box)
-        st_lbl1 = QLabel("🟢 DRIP-FEED MOTORU: AKTİF")
-        st_lbl1.setStyleSheet("color: #4ade80; font-weight: 800; font-size: 11px; background: transparent; border: none;")
-        st_lbl2 = QLabel("• Rastgele Node Sıralaması\n• Organik Sandviç Oturumu\n• Pil & Sıcaklık Kalkanı")
-        st_lbl2.setStyleSheet("color: #a1a1aa; font-size: 11px; background: transparent; border: none;")
-        st_layout.addWidget(st_lbl1)
-        st_layout.addWidget(st_lbl2)
-        sb_layout.addWidget(status_box)
+        ctk.CTkLabel(
+            self.quick_frame, text="DONANIM & EKRAN KONTROLÜ", font=("Segoe UI", 10, "bold"), text_color="#94a3b8"
+        ).pack(anchor="w", padx=12, pady=(8, 4))
 
-        root_layout.addWidget(sidebar)
+        ctk.CTkButton(
+            self.quick_frame, text="📴 Cihazda Ekranları & FB/TT Kapat", height=34, corner_radius=6,
+            fg_color="#e11d48", hover_color="#be123c", font=("Segoe UI", 11, "bold"),
+            command=self.sleep_all_connected
+        ).pack(fill="x", padx=10, pady=3)
 
-        # SAĞ ANA EKRAN
-        main_area = QWidget()
-        main_v = QVBoxLayout(main_area)
-        main_v.setContentsMargins(24, 24, 24, 24)
-        main_v.setSpacing(18)
+        ctk.CTkButton(
+            self.quick_frame, text="📱 Tümünü Dikey Moda Kilitle", height=30, corner_radius=6,
+            fg_color="#0d9488", hover_color="#0f766e", font=("Segoe UI", 11, "bold"),
+            command=self.lock_all_portrait
+        ).pack(fill="x", padx=10, pady=3)
 
-        bio = Humanizer.get_circadian_status()
-        kpi_layout = QHBoxLayout()
-        kpi_layout.setSpacing(16)
-        self.card_nodes = StatCard("Filo & Persona", "30 Node", "Her Cihazda Benzersiz DNA", "#38bdf8")
-        self.card_accounts = StatCard("Kayıtlı FB Hesabı", "3 Aktif", "Çoklu Profil Rotasyonu", "#a855f7")
-        self.card_tasks = StatCard("Kuyruktaki Görev", "0 Görev", "Drip-Feed Dalga Hazır", "#10b981")
-        self.card_bio = StatCard("Biyolojik Saat Fazı", bio["phase"], f"Aktiflik: %{int(bio['activity_prob']*100)} | Yorgunluk: x{bio['fatigue_mult']}", "#f59e0b")
+        ctk.CTkButton(
+            self.quick_frame, text="🖥️ PC'de Seçili Ekranları Aç", height=30, corner_radius=6,
+            fg_color="#0284c7", hover_color="#0369a1", font=("Segoe UI", 11, "bold"),
+            command=self.open_selected_screens
+        ).pack(fill="x", padx=10, pady=3)
 
-        kpi_layout.addWidget(self.card_nodes)
-        kpi_layout.addWidget(self.card_accounts)
-        kpi_layout.addWidget(self.card_tasks)
-        kpi_layout.addWidget(self.card_bio)
-        main_v.addLayout(kpi_layout)
+        ctk.CTkButton(
+            self.quick_frame, text="❌ PC'de İzleme Pencerelerini Kapat", height=30, corner_radius=6,
+            fg_color="#475569", hover_color="#334155", font=("Segoe UI", 11),
+            command=self.close_all_screens
+        ).pack(fill="x", padx=10, pady=3)
 
-        self.stack = QStackedWidget()
-        main_v.addWidget(self.stack)
+        ctk.CTkButton(
+            self.quick_frame, text="🔇 Tüm Sesleri Kapat", height=28, corner_radius=6,
+            fg_color="#334155", hover_color="#475569", font=("Segoe UI", 11),
+            command=self.mute_all_connected
+        ).pack(fill="x", padx=10, pady=(3, 8))
 
-        self.page_dash = QWidget()
-        self.page_agent = QWidget()
-        self.page_persona = QWidget()
-        self.page_fleet = QWidget()
-        self.page_proxy = QWidget()
-        self.page_accounts = QWidget()
+        self.status_badge = ctk.CTkFrame(self.sidebar, fg_color="#0b131e", corner_radius=10, border_width=1, border_color="#059669")
+        self.status_badge.pack(side="bottom", fill="x", padx=12, pady=10)
+        ctk.CTkLabel(
+            self.status_badge, text="● OTOMATİK TEMİZLİK: AKTİF", font=("Segoe UI", 10, "bold"), text_color="#4ade80"
+        ).pack(anchor="w", padx=10, pady=(6, 2))
+        ctk.CTkLabel(
+            self.status_badge,
+            text="• Sürekli Dikey Ekran Kilidi\n• İşlem Bitince FB & TikTok Kapatır\n• Cihaz Ekranlarını Uyku Moduna Alır",
+            justify="left", font=("Segoe UI", 10), text_color="#94a3b8"
+        ).pack(anchor="w", padx=10, pady=(0, 6))
 
-        self.init_dashboard_page()
-        self.init_agent_page()
-        self.init_persona_page()
-        self.init_fleet_page()
-        self.init_proxy_page()
-        self.init_accounts_page()
+        # SAG ANA CALISMA ALANI
+        self.main_area = ctk.CTkFrame(self, fg_color="#090d16", corner_radius=0)
+        self.main_area.grid(row=0, column=1, sticky="nsew", padx=16, pady=12)
+        self.main_area.grid_columnconfigure(0, weight=1)
+        self.main_area.grid_rowconfigure(1, weight=1)
 
-        self.stack.addWidget(self.page_dash)
-        self.stack.addWidget(self.page_agent)
-        self.stack.addWidget(self.page_persona)
-        self.stack.addWidget(self.page_fleet)
-        self.stack.addWidget(self.page_proxy)
-        self.stack.addWidget(self.page_accounts)
+        kpi_row = ctk.CTkFrame(self.main_area, fg_color="transparent")
+        kpi_row.grid(row=0, column=0, sticky="ew", pady=(0, 10))
+        for c in range(4):
+            kpi_row.grid_columnconfigure(c, weight=1)
 
-        root_layout.addWidget(main_area)
-        self.refresh_kpis()
+        self.lbl_kpi_nodes = self.create_kpi_card(kpi_row, 0, "FİLO & DİKEY KİLİT", "0 / 25 Node", "Sürekli Dikey (Portrait) Aktif", "#38bdf8")
+        self.lbl_kpi_acc = self.create_kpi_card(kpi_row, 1, "GRUP & SAYFA HAVUZU", f"{len(self.saved_groups)} Grup | {len(self.saved_pages)} Sayfa", "Seçilebilir Buton Sistemi", "#a855f7")
+        self.lbl_kpi_queue = self.create_kpi_card(kpi_row, 2, "KUYRUKTAKİ GÖREV", "0 Görev", "Bitince FB/TT & Ekran Kapanır", "#22c55e")
+        self.lbl_kpi_bio = self.create_kpi_card(kpi_row, 3, "BİYOLOJİK SAAT FAZI", "PRIME_TIME (Zirve)", "Doğal Şikayet & Sandviç Açık", "#f59e0b")
 
-    def switch_page(self, index):
-        self.stack.setCurrentIndex(index)
-        for i, btn in enumerate(self.nav_buttons):
-            btn.setObjectName("NavBtnActive" if i == index else "NavBtn")
-            btn.style().unpolish(btn)
-            btn.style().polish(btn)
-        self.refresh_kpis()
-        if index == 1:
-            self.load_campaign_queue_table()
+        self.notebook_container = ctk.CTkFrame(self.main_area, fg_color="#0f1523", corner_radius=12, border_width=1, border_color="#1e293b")
+        self.notebook_container.grid(row=1, column=0, sticky="nsew")
+        self.notebook_container.grid_columnconfigure(0, weight=1)
+        self.notebook_container.grid_rowconfigure(0, weight=1)
 
-    def refresh_kpis(self):
-        if not os.path.exists(DB_PATH):
-            return
-        conn = sqlite3.connect(DB_PATH)
-        c = conn.cursor()
-        c.execute("SELECT COUNT(*) FROM fb_accounts")
-        acc_count = c.fetchone()[0]
-        c.execute("SELECT COUNT(*) FROM targeted_tasks WHERE status='PENDING'")
-        pending_count = c.fetchone()[0]
-        conn.close()
-        self.card_accounts.lbl_value.setText(f"{acc_count} Hesap")
-        self.card_tasks.lbl_value.setText(f"{pending_count} Görev")
+        self.tabs = {}
+        for key in ["tab_fleet", "tab_campaign", "tab_telegram", "tab_pages", "tab_report", "tab_watcher", "tab_warmup"]:
+            frame = ctk.CTkFrame(self.notebook_container, fg_color="transparent")
+            frame.grid(row=0, column=0, sticky="nsew", padx=14, pady=12)
+            self.tabs[key] = frame
 
-    def init_dashboard_page(self):
-        layout = QVBoxLayout(self.page_dash)
-        layout.setContentsMargins(0, 0, 0, 0)
-        layout.setSpacing(16)
+        self.build_tab_fleet(self.tabs["tab_fleet"])
+        self.build_tab_campaign(self.tabs["tab_campaign"])
+        self.build_tab_telegram(self.tabs["tab_telegram"])
+        self.build_tab_pages(self.tabs["tab_pages"])
+        self.build_tab_report(self.tabs["tab_report"])
+        self.build_tab_watcher(self.tabs["tab_watcher"])
+        self.build_tab_warmup(self.tabs["tab_warmup"])
 
-        action_card = QFrame()
-        action_card.setObjectName("PanelCard")
-        act_layout = QHBoxLayout(action_card)
-        act_layout.setContentsMargins(16, 14, 16, 14)
-        act_layout.setSpacing(12)
+        # ALT ACILIR / KAPANIR CANLI KONSOL CEKMECESI
+        self.console_wrapper = ctk.CTkFrame(self.main_area, fg_color="#0f1523", corner_radius=10, border_width=1, border_color="#1e293b")
+        self.console_wrapper.grid(row=2, column=0, sticky="ew", pady=(10, 0))
 
-        lbl_act = QLabel("⚡ Hızlı Komuta:")
-        lbl_act.setStyleSheet("font-weight: 800; color: #f4f4f5; background: transparent; border: none;")
-        act_layout.addWidget(lbl_act)
+        con_hdr = ctk.CTkFrame(self.console_wrapper, fg_color="#161f33", corner_radius=8, height=34)
+        con_hdr.pack(fill="x", padx=4, pady=4)
 
-        self.btn_start_bot = QPushButton("🚀 Kampanya & Biyometrik Motoru Başlat")
-        self.btn_start_bot.setObjectName("BtnEmerald")
-        self.btn_start_bot.clicked.connect(self.start_bot_process)
-        act_layout.addWidget(self.btn_start_bot)
+        ctk.CTkLabel(
+            con_hdr, text="🖥️  Canlı Operasyon, Sandviç Akışı & Telemetri Konsolu",
+            font=("Segoe UI", 11, "bold"), text_color="#38bdf8"
+        ).pack(side="left", padx=10)
 
-        btn_go_cmp = QPushButton("🎯 Yeni 30-Node Kampanya Oluştur")
-        btn_go_cmp.setObjectName("BtnIndigo")
-        btn_go_cmp.clicked.connect(lambda: self.switch_page(1))
-        act_layout.addWidget(btn_go_cmp)
-
-        btn_grid = QPushButton("🎛️ Tüm Ekranları Aç (Scrcpy)")
-        btn_grid.clicked.connect(self.open_all_scrcpy)
-        act_layout.addWidget(btn_grid)
-
-        btn_tg = QPushButton("📲 Telegram Özeti")
-        btn_tg.setObjectName("BtnAmber")
-        btn_tg.clicked.connect(self.send_telegram_alert)
-        act_layout.addWidget(btn_tg)
-
-        btn_kill = QPushButton("🚨 Acil Kill-Switch")
-        btn_kill.setObjectName("BtnRose")
-        btn_kill.clicked.connect(self.trigger_kill_switch)
-        act_layout.addWidget(btn_kill)
-
-        act_layout.addStretch()
-        layout.addWidget(action_card)
-
-        split_layout = QHBoxLayout()
-        split_layout.setSpacing(16)
-
-        log_card = QFrame()
-        log_card.setObjectName("PanelCard")
-        log_v = QVBoxLayout(log_card)
-        log_lbl = QLabel("🖥️ Canlı Kampanya, Sandviç Akışı & Telemetri Konsolu")
-        log_lbl.setStyleSheet("font-weight: 700; color: #38bdf8; background: transparent; border: none;")
-        self.log_console = QTextEdit()
-        self.log_console.setReadOnly(True)
-        self.log_console.append("[SYSTEM] AutoFarm-30 Biometric Campaign Suite v4.0 yüklendi.")
-        self.log_console.append("[DRIP-FEED] 30 Cihazlık Zaman Yayılımlı Kampanya Dağıtıcı hazır.")
-        log_v.addWidget(log_lbl)
-        log_v.addWidget(self.log_console)
-
-        summary_card = QFrame()
-        summary_card.setObjectName("PanelCard")
-        sum_v = QVBoxLayout(summary_card)
-        sum_lbl = QLabel("🤖 Yönetici Ajan Canlı Özeti")
-        sum_lbl.setStyleSheet("font-weight: 700; color: #a855f7; background: transparent; border: none;")
-        self.dash_agent_box = QTextEdit()
-        self.dash_agent_box.setReadOnly(True)
-        self.dash_agent_box.setStyleSheet("color: #e4e4e7;")
-        self.dash_agent_box.setPlainText(ManagerAgent.get_fleet_report())
-        sum_v.addWidget(sum_lbl)
-        sum_v.addWidget(self.dash_agent_box)
-
-        split_layout.addWidget(log_card, 3)
-        split_layout.addWidget(summary_card, 2)
-        layout.addLayout(split_layout)
-
-    def init_agent_page(self):
-        layout = QVBoxLayout(self.page_agent)
-        layout.setContentsMargins(0, 0, 0, 0)
-        layout.setSpacing(14)
-
-        form_card = QFrame()
-        form_card.setObjectName("PanelCard")
-        f_v = QVBoxLayout(form_card)
-        f_v.setContentsMargins(16, 14, 16, 14)
-        f_v.setSpacing(10)
-
-        lbl_head = QLabel("🚀 30-Cihaz Zaman Yayılımlı (Drip-Feed) Kampanya Dağıtıcı")
-        lbl_head.setStyleSheet("color: #38bdf8; font-weight: 800; font-size: 14px; border: none; background: transparent;")
-        f_v.addWidget(lbl_head)
-
-        row1 = QHBoxLayout()
-        self.input_link = QLineEdit()
-        self.input_link.setPlaceholderText("Hedef Facebook Gönderi / Reels Linki (https://www.facebook.com/...)")
-        self.input_comment = QLineEdit()
-        self.input_comment.setPlaceholderText("Yorum Konsepti (Boş bırakırsanız her cihaz kendi Persona karakterine göre özgün üretir)")
-        row1.addWidget(self.input_link, 2)
-        row1.addWidget(self.input_comment, 2)
-        f_v.addLayout(row1)
-
-        row2 = QHBoxLayout()
-        self.combo_node_count = QComboBox()
-        self.combo_node_count.addItems([
-            "5 Cihaz (Mini Dalga)",
-            "10 Cihaz (Orta Dalga)",
-            "20 Cihaz (Güçlü Dalga)",
-            "30 Cihaz (Tam Filo Ordusu)"
-        ])
-        self.combo_node_count.setCurrentIndex(1)
-
-        self.combo_mix_mode = QComboBox()
-        self.combo_mix_mode.addItems([
-            "Organik Karışım (%60 Beğeni + %40 Persona Yorum)",
-            "Tam Etkileşim (%100 Beğeni + Persona Yorum)",
-            "Sadece Beğeni (%100 Like Dalga)"
-        ])
-
-        self.combo_speed_mode = QComboBox()
-        self.combo_speed_mode.addItems([
-            "Hızlı Simülasyon (3-12 sn rastgele aralık)",
-            "Doğal Dalga (25-95 sn rastgele aralık)",
-            "Uzun Organik Yayılım (2-7 dk rastgele aralık)"
-        ])
-
-        btn_launch_cmp = QPushButton("🎯 Kampanyayı Filoya Dağıt")
-        btn_launch_cmp.setObjectName("BtnEmerald")
-        btn_launch_cmp.clicked.connect(self.launch_drip_campaign)
-
-        btn_clear_cmp = QPushButton("🧹 Tamamlananları Temizle")
-        btn_clear_cmp.clicked.connect(self.clear_completed_queue)
-
-        row2.addWidget(self.combo_node_count, 1)
-        row2.addWidget(self.combo_mix_mode, 2)
-        row2.addWidget(self.combo_speed_mode, 2)
-        row2.addWidget(btn_launch_cmp, 1)
-        row2.addWidget(btn_clear_cmp, 1)
-        f_v.addLayout(row2)
-        layout.addWidget(form_card)
-
-        self.queue_table = QTableWidget()
-        self.queue_table.setColumnCount(7)
-        self.queue_table.setHorizontalHeaderLabels([
-            "GÖREV ID", "KAMPANYA", "ATANAN CİHAZ", "PERSONA DNA",
-            "İŞLEM TİPİ", "ZAMANLAMA (DRIP-FEED)", "ÖZGÜN YORUM & DURUM"
-        ])
-        self.queue_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
-        layout.addWidget(self.queue_table)
-        self.load_campaign_queue_table()
-
-    def launch_drip_campaign(self):
-        link = self.input_link.text().strip()
-        if not link:
-            QMessageBox.warning(self, "Uyarı", "Lütfen hedef gönderi linkini girin!")
-            return
-        comment_hint = self.input_comment.text().strip()
-
-        count_map = {0: 5, 1: 10, 2: 20, 3: 30}
-        node_count = count_map.get(self.combo_node_count.currentIndex(), 10)
-
-        mix_map = {0: "ORGANIC_MIX", 1: "ALL_COMMENT", 2: "ALL_LIKE"}
-        mix_mode = mix_map.get(self.combo_mix_mode.currentIndex(), "ORGANIC_MIX")
-
-        speed_map = {0: "FAST_SIM", 1: "NATURAL_WAVE", 2: "LONG_DRIP"}
-        speed_mode = speed_map.get(self.combo_speed_mode.currentIndex(), "FAST_SIM")
-
-        cmp_code, tasks = CampaignDistributor.create_campaign(
-            post_link=link,
-            node_count=node_count,
-            mix_mode=mix_mode,
-            speed_mode=speed_mode,
-            base_comment=comment_hint
+        self.btn_toggle_con = ctk.CTkButton(
+            con_hdr, text="▼ Konsolu Gizle", width=120, height=24, corner_radius=6,
+            fg_color="#334155", hover_color="#475569", font=("Segoe UI", 10, "bold"),
+            command=self.toggle_console
         )
+        self.btn_toggle_con.pack(side="right", padx=6, pady=4)
 
-        self.input_link.clear()
-        self.input_comment.clear()
-        self.load_campaign_queue_table()
-        self.refresh_agent_report()
-        self.refresh_kpis()
-        self.log_console.append(
-            f"[CAMPAIGN] 🚀 {cmp_code} oluşturuldu! {len(tasks)} cihaza rastgele sırayla ve zaman yayılımlı dağıtıldı."
+        ctk.CTkButton(
+            con_hdr, text="⏹️ Görevi Durdur & FB/TT Kapat", width=190, height=24, corner_radius=6,
+            fg_color="#ea580c", hover_color="#c2410c", font=("Segoe UI", 10, "bold"),
+            command=self.stop_active_proc
+        ).pack(side="right", padx=4, pady=4)
+
+        self.txt_log = ctk.CTkTextbox(
+            self.console_wrapper, height=125, fg_color="#060911", text_color="#4ade80",
+            font=("Consolas", 11), corner_radius=6
         )
+        self.txt_log.pack(fill="both", expand=True, padx=6, pady=(0, 6))
+        self.log("[SİSTEM] AutoFarm-30 v7.0 hazır. Tüm telefonlar dikey (Portrait) moda kilitlendi.")
 
-    def clear_completed_queue(self):
-        CampaignDistributor.clear_completed_tasks()
-        self.load_campaign_queue_table()
-        self.refresh_agent_report()
-        self.refresh_kpis()
+        self.select_tab("tab_fleet")
 
-    def load_campaign_queue_table(self):
-        CampaignDistributor.ensure_schema()
-        conn = sqlite3.connect(DB_PATH)
-        c = conn.cursor()
-        c.execute(
-            """SELECT id, campaign_code, device_id, persona_name, action_type, delay_sec, comment_text, status
-               FROM targeted_tasks
-               ORDER BY status DESC, delay_sec ASC, id DESC"""
+    def create_kpi_card(self, parent, col, title, main_val, sub_val, accent_color):
+        card = ctk.CTkFrame(parent, fg_color="#111827", corner_radius=12, border_width=1, border_color="#1e293b")
+        card.grid(row=0, column=col, sticky="ew", padx=6)
+
+        top_line = ctk.CTkFrame(card, height=4, corner_radius=2, fg_color=accent_color)
+        top_line.pack(fill="x", padx=12, pady=(0, 6))
+
+        ctk.CTkLabel(card, text=title, font=("Segoe UI", 10, "bold"), text_color="#94a3b8").pack(anchor="w", padx=16)
+        lbl_val = ctk.CTkLabel(card, text=main_val, font=("Segoe UI", 18, "bold"), text_color="#f8fafc")
+        lbl_val.pack(anchor="w", padx=16, pady=(2, 2))
+        ctk.CTkLabel(card, text=sub_val, font=("Segoe UI", 10), text_color=accent_color).pack(anchor="w", padx=16, pady=(0, 8))
+        return lbl_val
+
+    def toggle_sidebar(self):
+        if self.sidebar_expanded:
+            self.sidebar.configure(width=64)
+            self.lbl_brand_title.pack_forget()
+            self.lbl_brand_sub.pack_forget()
+            self.quick_frame.pack_forget()
+            self.status_badge.pack_forget()
+            for key, (btn, full_txt) in self.nav_buttons.items():
+                icon = full_txt.split()[0]
+                btn.configure(text=icon, width=40, anchor="center")
+            self.sidebar_expanded = False
+        else:
+            self.sidebar.configure(width=255)
+            self.lbl_brand_title.pack(side="left", padx=10)
+            self.lbl_brand_sub.pack(anchor="w", padx=18, pady=(0, 10))
+            for key, (btn, full_txt) in self.nav_buttons.items():
+                btn.configure(text=full_txt, anchor="w")
+            self.quick_frame.pack(fill="x", padx=12, pady=10)
+            self.status_badge.pack(side="bottom", fill="x", padx=12, pady=10)
+            self.sidebar_expanded = True
+
+    def toggle_console(self):
+        if self.console_expanded:
+            self.txt_log.pack_forget()
+            self.btn_toggle_con.configure(text="▲ Konsolu Aç")
+            self.console_expanded = False
+        else:
+            self.txt_log.pack(fill="both", expand=True, padx=6, pady=(0, 6))
+            self.btn_toggle_con.configure(text="▼ Konsolu Gizle")
+            self.console_expanded = True
+
+    def select_tab(self, tab_key):
+        for k, frame in self.tabs.items():
+            if k == tab_key:
+                frame.tkraise()
+        for k, (btn, _) in self.nav_buttons.items():
+            if k == tab_key:
+                btn.configure(fg_color="#1d4ed8", text_color="#ffffff")
+            else:
+                btn.configure(fg_color="transparent", text_color="#cbd5e1")
+
+    # ==========================================================================
+    # SEKME 1: FILO CIHAZ YONETIMI (+ CIHAZ EKRAN KAPATMA BUTONU)
+    # ==========================================================================
+    def build_tab_fleet(self, parent):
+        top_bar = ctk.CTkFrame(parent, fg_color="#161f33", corner_radius=10)
+        top_bar.pack(fill="x", pady=(0, 10))
+
+        ctk.CTkLabel(
+            top_bar, text="📱 Fiziksel Cihaz Filosu (25 Node) & Tekil Ekran / Uygulama Kontrolü",
+            font=("Segoe UI", 14, "bold"), text_color="#38bdf8"
+        ).pack(side="left", padx=14, pady=10)
+
+        ctk.CTkButton(
+            top_bar, text="💾 İsim, Proxy & DNA Kaydet", height=32, corner_radius=8,
+            fg_color="#7c3aed", hover_color="#6d28d9", font=("Segoe UI", 11, "bold"),
+            command=self.save_all_profiles
+        ).pack(side="right", padx=8, pady=8)
+
+        ctk.CTkButton(
+            top_bar, text="📴 Tüm Cihaz Ekranlarını & FB/TT Kapat", height=32, corner_radius=8,
+            fg_color="#e11d48", hover_color="#be123c", font=("Segoe UI", 11, "bold"),
+            command=self.sleep_all_connected
+        ).pack(side="right", padx=4, pady=8)
+
+        ctk.CTkButton(
+            top_bar, text="🔄 Cihazları Tara (Dikey Kilitle)", height=32, corner_radius=8,
+            fg_color="#2563eb", hover_color="#1d4ed8", font=("Segoe UI", 11, "bold"),
+            command=self.refresh_devices
+        ).pack(side="right", padx=4, pady=8)
+
+        ctk.CTkButton(
+            top_bar, text="🟢 Sadece ONLINE Seç", height=32, corner_radius=8,
+            fg_color="#059669", hover_color="#047857", font=("Segoe UI", 11, "bold"),
+            command=self.select_only_online
+        ).pack(side="right", padx=4, pady=8)
+
+        hdr = ctk.CTkFrame(parent, fg_color="#1e293b", corner_radius=8, height=34)
+        hdr.pack(fill="x", pady=(0, 4))
+        cols = [
+            ("SEÇ", 40), ("NODE", 70), ("SERİ NO", 145),
+            ("DURUM / VPN / ISI", 145), ("FACEBOOK İSİM SOYİSİM", 175),
+            ("ATANAN PROXY TÜNELİ", 205), ("PERSONA DNA", 150), ("TEKİL EKRAN & CİHAZ KONTROLÜ", 265)
+        ]
+        for text, w in cols:
+            ctk.CTkLabel(hdr, text=text, width=w, anchor="w", font=("Segoe UI", 10, "bold"), text_color="#94a3b8").pack(side="left", padx=4, pady=5)
+
+        scroll = ctk.CTkScrollableFrame(parent, fg_color="#0b0f19", corner_radius=10)
+        scroll.pack(fill="both", expand=True)
+
+        for i in range(1, 26):
+            node_id = f"NODE-{i:02d}"
+            row_bg = "#131c2e" if i % 2 == 0 else "#0d1322"
+            row = ctk.CTkFrame(scroll, fg_color=row_bg, corner_radius=6, height=38)
+            row.pack(fill="x", pady=2, padx=2)
+
+            chk_var = tk.BooleanVar(value=True)
+            chk = ctk.CTkCheckBox(row, text="", variable=chk_var, width=24, checkbox_width=18, checkbox_height=18, corner_radius=4)
+            chk.pack(side="left", padx=(8, 4))
+
+            ctk.CTkLabel(row, text=node_id, width=65, anchor="w", font=("Consolas", 12, "bold"), text_color="#38bdf8").pack(side="left", padx=4)
+            lbl_ser = ctk.CTkLabel(row, text="BEKLIYOR...", width=145, anchor="w", font=("Consolas", 11), text_color="#64748b")
+            lbl_ser.pack(side="left", padx=4)
+
+            lbl_st = ctk.CTkLabel(row, text="○ OFFLINE", width=145, anchor="w", font=("Segoe UI", 11, "bold"), text_color="#f87171")
+            lbl_st.pack(side="left", padx=4)
+
+            ent_name = ctk.CTkEntry(row, width=170, height=28, corner_radius=6, fg_color="#1e293b", border_color="#334155", font=("Segoe UI", 11))
+            ent_name.insert(0, self.profiles[node_id].get("fb_name", f"FB Hesap {i:02d}"))
+            ent_name.pack(side="left", padx=4)
+
+            ent_proxy = ctk.CTkEntry(row, width=200, height=28, corner_radius=6, fg_color="#1e293b", border_color="#334155", font=("Consolas", 10))
+            ent_proxy.insert(0, self.profiles[node_id].get("proxy", f"socks5://127.0.0.1:{1080+i}"))
+            ent_proxy.pack(side="left", padx=4)
+
+            cmb_persona = ctk.CTkComboBox(row, values=PERSONAS, width=145, height=28, corner_radius=6, fg_color="#1e293b", border_color="#334155", font=("Segoe UI", 10))
+            cmb_persona.set(self.profiles[node_id].get("persona", PERSONAS[(i-1)%len(PERSONAS)]))
+            cmb_persona.pack(side="left", padx=4)
+
+            act_box = ctk.CTkFrame(row, fg_color="transparent")
+            act_box.pack(side="left", padx=4)
+
+            ctk.CTkButton(act_box, text="📲 İzle", width=50, height=26, corner_radius=6, fg_color="#0284c7", hover_color="#0369a1", font=("Segoe UI", 10, "bold"), command=lambda idx=i: self.open_single_screen(idx)).pack(side="left", padx=2)
+            ctk.CTkButton(act_box, text="❌ P.Kapat", width=62, height=26, corner_radius=6, fg_color="#475569", hover_color="#334155", font=("Segoe UI", 10), command=lambda idx=i: self.close_single_screen(idx)).pack(side="left", padx=2)
+            ctk.CTkButton(act_box, text="📴 Ekran Kapat", width=85, height=26, corner_radius=6, fg_color="#e11d48", hover_color="#be123c", font=("Segoe UI", 10, "bold"), command=lambda idx=i: self.sleep_single_device(idx)).pack(side="left", padx=2)
+            ctk.CTkButton(act_box, text="🔥 Isıt", width=48, height=26, corner_radius=6, fg_color="#16a34a", hover_color="#15803d", font=("Segoe UI", 10, "bold"), command=lambda idx=i: self.start_single_warmup(idx)).pack(side="left", padx=2)
+
+            self.row_widgets[i] = {
+                "chk": chk_var, "ser": lbl_ser, "st": lbl_st,
+                "name": ent_name, "proxy": ent_proxy, "persona": cmb_persona,
+                "serial_val": None
+            }
+
+    # ==========================================================================
+    # SEKME 2: KAMPANYA DAGITICI + KUYRUK TABLOSU
+    # ==========================================================================
+    def build_tab_campaign(self, parent):
+        top_card = ctk.CTkFrame(parent, fg_color="#141c2e", corner_radius=12, border_width=1, border_color="#1e293b")
+        top_card.pack(fill="x", pady=(0, 10))
+
+        hdr_row = ctk.CTkFrame(top_card, fg_color="transparent")
+        hdr_row.pack(fill="x", padx=16, pady=(10, 6))
+
+        ctk.CTkLabel(hdr_row, text="🚀 Otomatik Kampanya Dağıtıcı (Sayılı Yorum | Gruba Katıl | Kişi Ekle | Şikayet)", font=("Segoe UI", 14, "bold"), text_color="#38bdf8").pack(side="left")
+
+        self.var_rand_order = tk.BooleanVar(value=True)
+        ctk.CTkSwitch(hdr_row, text="Rastgele Cihaz Sırası", variable=self.var_rand_order, font=("Segoe UI", 11, "bold")).pack(side="right", padx=10)
+
+        self.var_sandwich = tk.BooleanVar(value=True)
+        ctk.CTkSwitch(hdr_row, text="Organik Sandviç Oturumu", variable=self.var_sandwich, font=("Segoe UI", 11, "bold")).pack(side="right", padx=10)
+
+        ctk.CTkLabel(hdr_row, text="Dalga Aralığı (Min-Max sn):", font=("Segoe UI", 11), text_color="#94a3b8").pack(side="right", padx=4)
+        self.ent_wmax = ctk.CTkEntry(hdr_row, width=48, height=28, justify="center")
+        self.ent_wmax.insert(0, "14")
+        self.ent_wmax.pack(side="right", padx=2)
+        self.ent_wmin = ctk.CTkEntry(hdr_row, width=48, height=28, justify="center")
+        self.ent_wmin.insert(0, "5")
+        self.ent_wmin.pack(side="right", padx=2)
+
+        grid_f = ctk.CTkFrame(top_card, fg_color="transparent")
+        grid_f.pack(fill="x", padx=16, pady=(4, 12))
+        grid_f.grid_columnconfigure(1, weight=1)
+
+        ctk.CTkLabel(grid_f, text="💬 Hedef Gönderi & Sayılı Yorum:", font=("Segoe UI", 11, "bold"), text_color="#38bdf8").grid(row=0, column=0, sticky="w", pady=5, padx=(0, 10))
+        self.ent_post_url = ctk.CTkEntry(grid_f, height=34, corner_radius=8)
+        self.ent_post_url.insert(0, "https://www.facebook.com/...")
+        self.ent_post_url.grid(row=0, column=1, sticky="ew", pady=5, padx=4)
+
+        self.ent_comm_title = ctk.CTkEntry(grid_f, width=240, height=34, corner_radius=8)
+        self.ent_comm_title.insert(0, "Harika paylaşım")
+        self.ent_comm_title.grid(row=0, column=2, pady=5, padx=4)
+
+        ctk.CTkButton(grid_f, text="🎯 Yorum + Beğeni Dağıt", width=190, height=34, corner_radius=8, fg_color="#2563eb", hover_color="#1d4ed8", font=("Segoe UI", 11, "bold"), command=lambda: self.queue_and_run("YORUM+BEGENI")).grid(row=0, column=3, pady=5, padx=(4, 0))
+
+        ctk.CTkLabel(grid_f, text="👥 Facebook Gruba Katılma:", font=("Segoe UI", 11, "bold"), text_color="#4ade80").grid(row=1, column=0, sticky="w", pady=5, padx=(0, 10))
+        self.ent_grp_url = ctk.CTkEntry(grid_f, height=34, corner_radius=8)
+        self.ent_grp_url.insert(0, "https://www.facebook.com/groups/...")
+        self.ent_grp_url.grid(row=1, column=1, columnspan=2, sticky="ew", pady=5, padx=4)
+
+        ctk.CTkButton(grid_f, text="👥 Tüm Kişilerle Gruba Katıl", width=190, height=34, corner_radius=8, fg_color="#16a34a", hover_color="#15803d", font=("Segoe UI", 11, "bold"), command=lambda: self.queue_and_run("GRUP_KATIL")).grid(row=1, column=3, pady=5, padx=(4, 0))
+
+        ctk.CTkLabel(grid_f, text="➕ Kişi Profili (Arkadaş Ekle):", font=("Segoe UI", 11, "bold"), text_color="#c084fc").grid(row=2, column=0, sticky="w", pady=5, padx=(0, 10))
+        self.ent_frd_url = ctk.CTkEntry(grid_f, height=34, corner_radius=8)
+        self.ent_frd_url.insert(0, "https://www.facebook.com/profile.php?id=...")
+        self.ent_frd_url.grid(row=2, column=1, columnspan=2, sticky="ew", pady=5, padx=4)
+
+        ctk.CTkButton(grid_f, text="➕ Kişiyi Ekle (Korumalı)", width=190, height=34, corner_radius=8, fg_color="#9333ea", hover_color="#7e22ce", font=("Segoe UI", 11, "bold"), command=lambda: self.queue_and_run("KISI_EKLE")).grid(row=2, column=3, pady=5, padx=(4, 0))
+
+        q_card = ctk.CTkFrame(parent, fg_color="#141c2e", corner_radius=12, border_width=1, border_color="#1e293b")
+        q_card.pack(fill="both", expand=True)
+
+        q_bar = ctk.CTkFrame(q_card, fg_color="transparent")
+        q_bar.pack(fill="x", padx=14, pady=8)
+        ctk.CTkLabel(q_bar, text="📋 Canlı Drip-Feed Görev Kuyruğu (Görev Bitince FB/TikTok & Ekranlar Otomatik Kapanır)", font=("Segoe UI", 13, "bold"), text_color="#f8fafc").pack(side="left")
+
+        ctk.CTkButton(q_bar, text="🧹 Tamamlananları Temizle", width=170, height=30, corner_radius=8, fg_color="#334155", hover_color="#475569", font=("Segoe UI", 11, "bold"), command=self.clear_queue_table).pack(side="right", padx=4)
+        ctk.CTkButton(q_bar, text="▶️ Bekleyen Kuyruğu Başlat", width=180, height=30, corner_radius=8, fg_color="#059669", hover_color="#047857", font=("Segoe UI", 11, "bold"), command=self.run_queue_worker).pack(side="right", padx=4)
+
+        q_cols = ("id", "node", "fb_name", "persona", "type", "delay", "status")
+        self.tree_q = ttk.Treeview(q_card, columns=q_cols, show="headings")
+        headers = [
+            ("id", "GÖREV ID", 70), ("node", "ATANAN CİHAZ", 100), ("fb_name", "FB HESAP İSMİ", 150),
+            ("persona", "PERSONA DNA", 150), ("type", "İŞLEM TİPİ", 130),
+            ("delay", "ZAMANLAMA", 100), ("status", "DETAY & DURUM", 380)
+        ]
+        for col_id, title, w in headers:
+            self.tree_q.heading(col_id, text=title)
+            self.tree_q.column(col_id, width=w, anchor="w")
+        self.tree_q.pack(fill="both", expand=True, padx=12, pady=(0, 12))
+
+    # ==========================================================================
+    # SEKME 3: TELEGRAM OTO-PAYLASIM & SECIMLI FACEBOOK GRUP BUTONLARI
+    # ==========================================================================
+    def build_tab_telegram(self, parent):
+        card = ctk.CTkFrame(parent, fg_color="#141c2e", corner_radius=12, border_width=1, border_color="#1e293b")
+        card.pack(fill="both", expand=True, padx=6, pady=6)
+
+        ctk.CTkLabel(
+            card, text="✈️ Telegram Ürün Görseli + Başlık + Link İndirici ve Seçilebilir Grup Butonları",
+            font=("Segoe UI", 15, "bold"), text_color="#ec4899"
+        ).pack(anchor="w", padx=20, pady=(14, 4))
+
+        # 1. Grup Linki Ekleme ve Buton Olusturma Alani
+        add_grp_bar = ctk.CTkFrame(card, fg_color="#0f1523", corner_radius=10)
+        add_grp_bar.pack(fill="x", padx=20, pady=6)
+
+        ctk.CTkLabel(add_grp_bar, text="Yeni Grup Adı:", font=("Segoe UI", 11, "bold"), text_color="#38bdf8").pack(side="left", padx=(12, 4), pady=10)
+        self.ent_new_grp_name = ctk.CTkEntry(add_grp_bar, width=180, height=32, placeholder_text="Örn: İndirim Grubu 1")
+        self.ent_new_grp_name.pack(side="left", padx=4, pady=10)
+
+        ctk.CTkLabel(add_grp_bar, text="Facebook Grup Linki:", font=("Segoe UI", 11, "bold"), text_color="#38bdf8").pack(side="left", padx=(10, 4), pady=10)
+        self.ent_new_grp_url = ctk.CTkEntry(add_grp_bar, height=32, placeholder_text="https://www.facebook.com/groups/...")
+        self.ent_new_grp_url.pack(side="left", fill="x", expand=True, padx=4, pady=10)
+
+        ctk.CTkButton(
+            add_grp_bar, text="➕ Facebook Grup Butonu Ekle", height=32, corner_radius=8,
+            fg_color="#16a34a", hover_color="#15803d", font=("Segoe UI", 11, "bold"),
+            command=self.add_group_button
+        ).pack(side="left", padx=6, pady=10)
+
+        ctk.CTkButton(
+            add_grp_bar, text="👥 Seçili Gruplara Tüm Cihazları Katılt", height=32, corner_radius=8,
+            fg_color="#2563eb", hover_color="#1d4ed8", font=("Segoe UI", 11, "bold"),
+            command=self.join_selected_group_buttons
+        ).pack(side="left", padx=(2, 12), pady=10)
+
+        # 2. Secilebilir Grup Butonlari (Tiklanabilir Buton Havuzu)
+        grp_pool_hdr = ctk.CTkFrame(card, fg_color="transparent")
+        grp_pool_hdr.pack(fill="x", padx=20, pady=(4, 2))
+        ctk.CTkLabel(grp_pool_hdr, text="📌 Paylaşım Yapılacak Facebook Grupları (Göndermek İstediğin Gruplara Tıkla / Seç):", font=("Segoe UI", 12, "bold"), text_color="#facc15").pack(side="left")
+        ctk.CTkButton(grp_pool_hdr, text="☑️ Tüm Grupları Seç", width=130, height=26, fg_color="#334155", font=("Segoe UI", 10, "bold"), command=lambda: self.toggle_all_group_btns(True)).pack(side="right", padx=4)
+        ctk.CTkButton(grp_pool_hdr, text="⬜ Seçimi Kaldır", width=110, height=26, fg_color="#334155", font=("Segoe UI", 10), command=lambda: self.toggle_all_group_btns(False)).pack(side="right", padx=4)
+
+        self.grp_buttons_frame = ctk.CTkScrollableFrame(card, height=120, fg_color="#0b0f19", corner_radius=10)
+        self.grp_buttons_frame.pack(fill="x", padx=20, pady=4)
+        self.render_group_buttons()
+
+        # 3. Telegram Gonderi + Baslik + Gorsel + Urun Linki Formu
+        form = ctk.CTkFrame(card, fg_color="#0f1523", corner_radius=10)
+        form.pack(fill="x", padx=20, pady=8)
+        form.grid_columnconfigure(1, weight=1)
+
+        ctk.CTkLabel(form, text="Telegram Gönderi Linki (Görsel + Başlık + Link Alınır):", font=("Segoe UI", 11, "bold")).grid(row=0, column=0, sticky="w", padx=14, pady=8)
+        self.ent_tg_url = ctk.CTkEntry(form, height=34, corner_radius=8)
+        self.ent_tg_url.insert(0, "https://t.me/kanal_adi/123")
+        self.ent_tg_url.grid(row=0, column=1, sticky="ew", padx=14, pady=8)
+
+        ctk.CTkLabel(form, text="Yoruma Eklenecek Ürün Başlığı:", font=("Segoe UI", 11, "bold")).grid(row=1, column=0, sticky="w", padx=14, pady=8)
+        self.ent_prod_title = ctk.CTkEntry(form, height=34, corner_radius=8)
+        self.ent_prod_title.insert(0, "Fırsat Ürünü Stokta")
+        self.ent_prod_title.grid(row=1, column=1, sticky="ew", padx=14, pady=8)
+
+        ctk.CTkLabel(form, text="Yoruma / Posta Eklenecek Ürün Linki:", font=("Segoe UI", 11, "bold")).grid(row=2, column=0, sticky="w", padx=14, pady=8)
+        self.ent_prod_link = ctk.CTkEntry(form, height=34, corner_radius=8)
+        self.ent_prod_link.insert(0, "https://urun-linki.com/kampanya")
+        self.ent_prod_link.grid(row=2, column=1, sticky="ew", padx=14, pady=8)
+
+        act_row = ctk.CTkFrame(card, fg_color="transparent")
+        act_row.pack(fill="x", padx=20, pady=8)
+
+        self.var_tg_autowatch = tk.BooleanVar(value=True)
+        ctk.CTkSwitch(
+            act_row, text="Paylaşım Sonrası 16 Dk Yorum Nöbetçisini Başlat (Kapalıysa İşlem Bitince FB/TT ve Ekranları Kapatır)",
+            variable=self.var_tg_autowatch, font=("Segoe UI", 11, "bold")
+        ).pack(side="left")
+
+        ctk.CTkButton(
+            act_row, text="🚀 Telegram'dan Görsel + Başlık İndir ve Seçili Grup Butonlarında Paylaş",
+            height=42, width=460, corner_radius=10, fg_color="#db2777", hover_color="#be185d", font=("Segoe UI", 12, "bold"),
+            command=self.start_telegram_pipeline
+        ).pack(side="right")
+
+    def render_group_buttons(self):
+        for widget in self.grp_buttons_frame.winfo_children():
+            widget.destroy()
+        self.group_btn_vars.clear()
+
+        for idx, grp in enumerate(self.saved_groups):
+            row_f = ctk.CTkFrame(self.grp_buttons_frame, fg_color="#161f33", corner_radius=8)
+            row_f.grid(row=idx // 3, column=idx % 3, padx=6, pady=5, sticky="ew")
+            self.grp_buttons_frame.grid_columnconfigure(idx % 3, weight=1)
+
+            var = tk.BooleanVar(value=grp.get("selected", True))
+            self.group_btn_vars.append((var, grp))
+
+            cb = ctk.CTkCheckBox(
+                row_f, text=f"👥 {grp['name']} ({grp['url'][:28]}...)",
+                variable=var, font=("Segoe UI", 11, "bold"), text_color="#f8fafc",
+                fg_color="#16a34a", hover_color="#15803d",
+                command=self.save_group_selections
+            )
+            cb.pack(side="left", padx=10, pady=8)
+
+            ctk.CTkButton(
+                row_f, text="✕", width=26, height=24, corner_radius=6,
+                fg_color="#dc2626", hover_color="#b91c1c", font=("Segoe UI", 10, "bold"),
+                command=lambda i=idx: self.remove_group_button(i)
+            ).pack(side="right", padx=6, pady=6)
+
+    def add_group_button(self):
+        name = self.ent_new_grp_name.get().strip() or f"Grup #{len(self.saved_groups)+1}"
+        url = self.ent_new_grp_url.get().strip()
+        if not url or "facebook.com" not in url:
+            self.log("[!] Geçerli bir Facebook grup linki girin!")
+            return
+        self.saved_groups.append({"name": name, "url": url, "selected": True})
+        save_json(GROUPS_FILE, self.saved_groups)
+        self.ent_new_grp_name.delete(0, "end")
+        self.ent_new_grp_url.delete(0, "end")
+        self.render_group_buttons()
+        self.lbl_kpi_acc.configure(text=f"{len(self.saved_groups)} Grup | {len(self.saved_pages)} Sayfa")
+        self.log(f"[GRUP BUTONU EKLENDİ] '{name}' ({url}) seçilebilir buton olarak eklendi.")
+
+    def remove_group_button(self, index):
+        if 0 <= index < len(self.saved_groups):
+            removed = self.saved_groups.pop(index)
+            save_json(GROUPS_FILE, self.saved_groups)
+            self.render_group_buttons()
+            self.lbl_kpi_acc.configure(text=f"{len(self.saved_groups)} Grup | {len(self.saved_pages)} Sayfa")
+            self.log(f"[SİLİNDİ] '{removed['name']}' grup butonu kaldırıldı.")
+
+    def save_group_selections(self):
+        for var, grp in self.group_btn_vars:
+            grp["selected"] = bool(var.get())
+        save_json(GROUPS_FILE, self.saved_groups)
+
+    def toggle_all_group_btns(self, state):
+        for var, grp in self.group_btn_vars:
+            var.set(state)
+            grp["selected"] = state
+        save_json(GROUPS_FILE, self.saved_groups)
+
+    def join_selected_group_buttons(self):
+        self.save_group_selections()
+        selected_urls = [g["url"] for g in self.saved_groups if g.get("selected")]
+        if not selected_urls:
+            self.log("[!] Katılmak için en az 1 grup butonu seçin!")
+            return
+        for u in selected_urls:
+            self.ent_grp_url.delete(0, "end")
+            self.ent_grp_url.insert(0, u)
+            self.queue_and_run("GRUP_KATIL")
+
+    # ==========================================================================
+    # SEKME 4: SAYFALAR (PAGES) BOLUMU
+    # ==========================================================================
+    def build_tab_pages(self, parent):
+        card = ctk.CTkFrame(parent, fg_color="#141c2e", corner_radius=12, border_width=1, border_color="#1e293b")
+        card.pack(fill="both", expand=True, padx=6, pady=6)
+
+        ctk.CTkLabel(
+            card, text="📄 Facebook Sayfalar (Pages) Yönetim & Etkileşim Merkezi",
+            font=("Segoe UI", 15, "bold"), text_color="#a855f7"
+        ).pack(anchor="w", padx=20, pady=(14, 4))
+        ctk.CTkLabel(
+            card, text="Sayfalarını buton olarak kaydet; istediğin sayfalara tek tıkla toplu Beğeni/Takip, Son Gönderiye Yorum veya Post Paylaşımı gönder.",
+            font=("Segoe UI", 11), text_color="#94a3b8"
+        ).pack(anchor="w", padx=20, pady=(0, 10))
+
+        add_pg_bar = ctk.CTkFrame(card, fg_color="#0f1523", corner_radius=10)
+        add_pg_bar.pack(fill="x", padx=20, pady=6)
+
+        ctk.CTkLabel(add_pg_bar, text="Sayfa Adı:", font=("Segoe UI", 11, "bold"), text_color="#c084fc").pack(side="left", padx=(12, 4), pady=10)
+        self.ent_new_pg_name = ctk.CTkEntry(add_pg_bar, width=180, height=32, placeholder_text="Örn: Mağaza Sayfamız")
+        self.ent_new_pg_name.pack(side="left", padx=4, pady=10)
+
+        ctk.CTkLabel(add_pg_bar, text="Sayfa Linki:", font=("Segoe UI", 11, "bold"), text_color="#c084fc").pack(side="left", padx=(10, 4), pady=10)
+        self.ent_new_pg_url = ctk.CTkEntry(add_pg_bar, height=32, placeholder_text="https://www.facebook.com/sayfa_adi")
+        self.ent_new_pg_url.pack(side="left", fill="x", expand=True, padx=4, pady=10)
+
+        ctk.CTkButton(
+            add_pg_bar, text="➕ Sayfa Butonu Ekle", height=32, corner_radius=8,
+            fg_color="#9333ea", hover_color="#7e22ce", font=("Segoe UI", 11, "bold"),
+            command=self.add_page_button
+        ).pack(side="left", padx=10, pady=10)
+
+        self.pg_buttons_frame = ctk.CTkScrollableFrame(card, height=140, fg_color="#0b0f19", corner_radius=10)
+        self.pg_buttons_frame.pack(fill="x", padx=20, pady=8)
+        self.render_page_buttons()
+
+        pg_act = ctk.CTkFrame(card, fg_color="#0f1523", corner_radius=10)
+        pg_act.pack(fill="x", padx=20, pady=10)
+
+        ctk.CTkButton(
+            pg_act, text="👍 Seçili Sayfaları Beğen, Takip Et & Son Gönderiyi Beğen", height=40, corner_radius=8,
+            fg_color="#7c3aed", hover_color="#6d28d9", font=("Segoe UI", 12, "bold"),
+            command=self.follow_selected_pages
+        ).pack(side="left", padx=14, pady=14)
+
+        ctk.CTkButton(
+            pg_act, text="✈️ Seçili Sayfalarda Telegram Gönderisini Paylaş", height=40, corner_radius=8,
+            fg_color="#db2777", hover_color="#be185d", font=("Segoe UI", 12, "bold"),
+            command=self.share_telegram_on_selected_pages
+        ).pack(side="left", padx=8, pady=14)
+
+    def render_page_buttons(self):
+        for widget in self.pg_buttons_frame.winfo_children():
+            widget.destroy()
+        self.page_btn_vars.clear()
+
+        for idx, pg in enumerate(self.saved_pages):
+            row_f = ctk.CTkFrame(self.pg_buttons_frame, fg_color="#161f33", corner_radius=8)
+            row_f.grid(row=idx // 3, column=idx % 3, padx=6, pady=5, sticky="ew")
+            self.pg_buttons_frame.grid_columnconfigure(idx % 3, weight=1)
+
+            var = tk.BooleanVar(value=pg.get("selected", True))
+            self.page_btn_vars.append((var, pg))
+
+            cb = ctk.CTkCheckBox(
+                row_f, text=f"📄 {pg['name']} ({pg['url'][:28]}...)",
+                variable=var, font=("Segoe UI", 11, "bold"), text_color="#f8fafc",
+                fg_color="#9333ea", hover_color="#7e22ce",
+                command=self.save_page_selections
+            )
+            cb.pack(side="left", padx=10, pady=8)
+
+            ctk.CTkButton(
+                row_f, text="✕", width=26, height=24, corner_radius=6,
+                fg_color="#dc2626", hover_color="#b91c1c", font=("Segoe UI", 10, "bold"),
+                command=lambda i=idx: self.remove_page_button(i)
+            ).pack(side="right", padx=6, pady=6)
+
+    def add_page_button(self):
+        name = self.ent_new_pg_name.get().strip() or f"Sayfa #{len(self.saved_pages)+1}"
+        url = self.ent_new_pg_url.get().strip()
+        if not url or "facebook.com" not in url:
+            self.log("[!] Geçerli bir Facebook sayfa linki girin!")
+            return
+        self.saved_pages.append({"name": name, "url": url, "selected": True})
+        save_json(PAGES_FILE, self.saved_pages)
+        self.ent_new_pg_name.delete(0, "end")
+        self.ent_new_pg_url.delete(0, "end")
+        self.render_page_buttons()
+        self.lbl_kpi_acc.configure(text=f"{len(self.saved_groups)} Grup | {len(self.saved_pages)} Sayfa")
+        self.log(f"[SAYFA EKLENDİ] '{name}' sayfası buton olarak kaydedildi.")
+
+    def remove_page_button(self, index):
+        if 0 <= index < len(self.saved_pages):
+            removed = self.saved_pages.pop(index)
+            save_json(PAGES_FILE, self.saved_pages)
+            self.render_page_buttons()
+            self.lbl_kpi_acc.configure(text=f"{len(self.saved_groups)} Grup | {len(self.saved_pages)} Sayfa")
+            self.log(f"[SİLİNDİ] '{removed['name']}' sayfası kaldırıldı.")
+
+    def save_page_selections(self):
+        for var, pg in self.page_btn_vars:
+            pg["selected"] = bool(var.get())
+        save_json(PAGES_FILE, self.saved_pages)
+
+    def follow_selected_pages(self):
+        self.save_page_selections()
+        urls = [p["url"] for p in self.saved_pages if p.get("selected")]
+        if not urls:
+            self.log("[!] İşlem için en az 1 sayfa butonu seçin!")
+            return
+        for u in urls:
+            self.queue_custom_task("SAYFA_ETKILESIM", u, "Sayfa Beğen & Takip Et")
+        self.run_queue_worker()
+
+    def share_telegram_on_selected_pages(self):
+        self.save_page_selections()
+        urls = [p["url"] for p in self.saved_pages if p.get("selected")]
+        if not urls:
+            self.log("[!] Paylaşım için en az 1 sayfa butonu seçin!")
+            return
+        self.run_telegram_to_targets(",".join(urls))
+
+    # ==========================================================================
+    # SEKME 5: DOGAL SIKAYET ETME (REPORT) MERKEZI
+    # ==========================================================================
+    def build_tab_report(self, parent):
+        card = ctk.CTkFrame(parent, fg_color="#141c2e", corner_radius=12, border_width=1, border_color="#1e293b")
+        card.pack(fill="both", expand=True, padx=10, pady=10)
+
+        ctk.CTkLabel(
+            card, text="🚩 Doğal Biyometrik Şikayet (Report) Operasyon Merkezi",
+            font=("Segoe UI", 16, "bold"), text_color="#f87171"
+        ).pack(anchor="w", padx=24, pady=(18, 6))
+        ctk.CTkLabel(
+            card,
+            text="Hedef Kişi Hesabı, Grup veya Sayfa linkini girdiğinde cihazlar önce organik sandviç gezinmesi yapar,\nardından hedef sayfayı doğal sürelerle inceleyip 3 nokta menüsünden şikayet adımlarını tamamlar ve uygulamayı kapatır.",
+            justify="left", font=("Segoe UI", 12), text_color="#94a3b8"
+        ).pack(anchor="w", padx=24, pady=(0, 18))
+
+        form = ctk.CTkFrame(card, fg_color="#0f1523", corner_radius=12)
+        form.pack(fill="x", padx=24, pady=10)
+        form.grid_columnconfigure(1, weight=1)
+
+        ctk.CTkLabel(form, text="Şikayet Edilecek Link (Kişi / Grup / Sayfa):", font=("Segoe UI", 12, "bold")).grid(row=0, column=0, sticky="w", padx=18, pady=14)
+        self.ent_rep_url = ctk.CTkEntry(form, height=36, corner_radius=8, placeholder_text="https://www.facebook.com/...")
+        self.ent_rep_url.grid(row=0, column=1, sticky="ew", padx=18, pady=14)
+
+        ctk.CTkLabel(form, text="Şikayet Kategorisi (Neden):", font=("Segoe UI", 12, "bold")).grid(row=1, column=0, sticky="w", padx=18, pady=14)
+        self.cmb_rep_reason = ctk.CTkComboBox(
+            form, values=["SAHTE (Sahte Hesap / Taklit)", "SPAM (Dolandırıcılık / Yanıltıcı / Spam)", "TACIZ (Zorbalık / Taciz)", "UYGUNSUZ (Nefret Söylemi / Uygunsuz İçerik)"],
+            height=36, width=380
         )
-        rows = c.fetchall()
-        conn.close()
+        self.cmb_rep_reason.set("SAHTE (Sahte Hesap / Taklit)")
+        self.cmb_rep_reason.grid(row=1, column=1, sticky="w", padx=18, pady=14)
 
-        self.queue_table.setRowCount(len(rows))
-        for r_idx, (tid, cmp_code, dev_id, p_name, act, d_sec, c_txt, st) in enumerate(rows):
-            self.queue_table.setItem(r_idx, 0, QTableWidgetItem(f"#{tid}"))
-            self.queue_table.setItem(r_idx, 1, QTableWidgetItem(str(cmp_code or "SINGLE")))
-            self.queue_table.setItem(r_idx, 2, QTableWidgetItem(f"node-{int(dev_id):02d}"))
-            self.queue_table.setItem(r_idx, 3, QTableWidgetItem(str(p_name or "Standart")))
-            self.queue_table.setItem(r_idx, 4, QTableWidgetItem("💬 YORUM + BEĞENİ" if act == "COMMENT" else "👍 SADECE BEĞENİ"))
+        ctk.CTkButton(
+            card, text="🚩 Seçili Tüm Cihazlarla Doğal Şikayet Operasyonunu Başlat",
+            height=46, corner_radius=10, fg_color="#dc2626", hover_color="#b91c1c", font=("Segoe UI", 13, "bold"),
+            command=self.start_natural_report
+        ).pack(fill="x", padx=24, pady=20)
 
-            mins, secs = divmod(int(d_sec or 0), 60)
-            time_str = f"T+{mins}dk {secs}sn" if mins > 0 else f"T+{secs}sn"
-            self.queue_table.setItem(r_idx, 5, QTableWidgetItem(time_str))
-
-            summary = f"[{st}] {c_txt}" if c_txt else f"[{st}] Organik Beğeni"
-            item_st = QTableWidgetItem(summary)
-            item_st.setForeground(QColor("#f59e0b" if st == "PENDING" else "#4ade80"))
-            self.queue_table.setItem(r_idx, 6, item_st)
-
-    def init_persona_page(self):
-        layout = QVBoxLayout(self.page_persona)
-        layout.setContentsMargins(0, 0, 0, 0)
-        layout.setSpacing(14)
-
-        sim_card = QFrame()
-        sim_card.setObjectName("PanelCard")
-        sim_layout = QHBoxLayout(sim_card)
-        sim_layout.setContentsMargins(14, 12, 14, 12)
-
-        self.input_sim_text = QLineEdit()
-        self.input_sim_text.setPlaceholderText("Canlı Klavye & Bézier Testi için örnek yorum yazın...")
-        self.input_sim_text.setText("Harika bir paylasim olmus emeginize saglik!")
-        btn_test_sim = QPushButton("🧬 Biyometrik Simülasyonu Test Et")
-        btn_test_sim.setObjectName("BtnIndigo")
-        btn_test_sim.clicked.connect(self.run_interactive_humanizer_test)
-
-        sim_layout.addWidget(self.input_sim_text, 3)
-        sim_layout.addWidget(btn_test_sim, 1)
-        layout.addWidget(sim_card)
-
-        self.lbl_sim_output = QLabel("💡 Yukarıdaki butona basarak klavye harf hatası (⌫) ve Bézier yay koordinatlarını canlı test edebilirsiniz.")
-        self.lbl_sim_output.setStyleSheet("color: #34d399; font-family: Menlo, monospace; font-size: 12px; padding: 6px;")
-        layout.addWidget(self.lbl_sim_output)
-
-        self.persona_table = QTableWidget()
-        self.persona_table.setColumnCount(7)
-        self.persona_table.setHorizontalHeaderLabels([
-            "NODE", "KARAKTER ARKETİPİ (PERSONA)", "BAŞPARMAK YÖNÜ",
-            "HIZ ÇARPANI", "HARF HATASI (TYPO %)", "HIZLI GEÇİŞ (SKIP %)", "DOKUNMA SAPMASI (JITTER)"
-        ])
-        self.persona_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
-        layout.addWidget(self.persona_table)
-        self.load_persona_table()
-
-    def load_persona_table(self):
-        self.persona_table.setRowCount(30)
-        for i in range(1, 31):
-            p = Persona.get_for_device(i)
-            row = i - 1
-            self.persona_table.setItem(row, 0, QTableWidgetItem(f"node-{i:02d}"))
-            self.persona_table.setItem(row, 1, QTableWidgetItem(p["name"]))
-            hand = "👉 SAĞLAK (RightArc)" if p["handedness"] == "RIGHT" else "👈 SOLAK (LeftArc)"
-            self.persona_table.setItem(row, 2, QTableWidgetItem(hand))
-            self.persona_table.setItem(row, 3, QTableWidgetItem(f"x{p['speed_mult']}"))
-            self.persona_table.setItem(row, 4, QTableWidgetItem(f"%{int(p['typo_rate']*100)}"))
-            self.persona_table.setItem(row, 5, QTableWidgetItem(f"%{int(p['skip_prob']*100)}"))
-            self.persona_table.setItem(row, 6, QTableWidgetItem(f"±{p['jitter_px']} piksel"))
-
-    def run_interactive_humanizer_test(self):
-        sample = self.input_sim_text.text().strip() or "Harika paylasim!"
-        seq = Humanizer.generate_typing_sequence(sample, typo_rate=0.16)
-        stream = ""
-        typos = 0
-        for act, ch, _ in seq:
-            if act == "TYPE_WRONG":
-                stream += f"[{ch}?]"
-                typos += 1
-            elif act == "BACKSPACE":
-                stream += "⌫"
-            elif act == "TYPE_CHAR":
-                stream += ch
-        swp = Humanizer.swipe_up_feed(None, Persona.get_for_device(1))
-        self.lbl_sim_output.setText(
-            f"⌨️ Klavye Akışı ({typos} hata düzeltildi): {stream}   |   👆 Bézier Yay: {swp['start']} ➔ {swp['arc_midpoint']} ➔ {swp['end']} ({swp['duration_sec']}sn)"
-        )
-
-    def init_fleet_page(self):
-        layout = QVBoxLayout(self.page_fleet)
-        layout.setContentsMargins(0, 0, 0, 0)
-        top = QHBoxLayout()
-        lbl = QLabel("📱 Fiziksel Cihaz Filosu (30 Node) ve ADB Bağlantı Durumu")
-        lbl.setStyleSheet("font-size: 15px; font-weight: 800; color: #38bdf8;")
-        btn_ref = QPushButton("🔄 Cihazları Yeniden Tara")
-        btn_ref.clicked.connect(self.load_device_table)
-        top.addWidget(lbl)
-        top.addStretch()
-        top.addWidget(btn_ref)
-        layout.addLayout(top)
-
-        self.device_table = QTableWidget()
-        self.device_table.setColumnCount(5)
-        self.device_table.setHorizontalHeaderLabels(["ID", "NODE ADI", "SERİ NO / IP", "ATANAN PROXY", "DURUM"])
-        self.device_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
-        layout.addWidget(self.device_table)
-        self.load_device_table()
-
-    def init_proxy_page(self):
-        layout = QVBoxLayout(self.page_proxy)
-        layout.setContentsMargins(0, 0, 0, 0)
-        lbl = QLabel("🌐 SOCKS5 Proxy Tüneli ve Ağ İzolasyon Tablosu")
-        lbl.setStyleSheet("font-size: 15px; font-weight: 800; color: #38bdf8;")
-        layout.addWidget(lbl)
-
-        self.proxy_table = QTableWidget()
-        self.proxy_table.setColumnCount(4)
-        self.proxy_table.setHorizontalHeaderLabels(["ID", "NODE ADI", "YEREL IP", "SOCKS5 PROXY TÜNELİ"])
-        self.proxy_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
-        layout.addWidget(self.proxy_table)
-        self.load_proxy_table()
-
-    def init_accounts_page(self):
-        layout = QVBoxLayout(self.page_accounts)
-        layout.setContentsMargins(0, 0, 0, 0)
-
-        form_card = QFrame()
-        form_card.setObjectName("PanelCard")
-        form_layout = QHBoxLayout(form_card)
-        self.input_acc_device = QLineEdit()
-        self.input_acc_device.setPlaceholderText("Cihaz ID (1-30)")
-        self.input_acc_name = QLineEdit()
-        self.input_acc_name.setPlaceholderText("FB Kullanıcı Adı / Etiketi")
-        self.combo_acc_pkg = QComboBox()
-        self.combo_acc_pkg.addItems(["com.facebook.katana", "com.facebook.lite"])
-        btn_add = QPushButton("➕ Yeni Hesap Ekle")
-        btn_add.setObjectName("BtnEmerald")
-        btn_add.clicked.connect(self.add_facebook_account)
-
-        form_layout.addWidget(self.input_acc_device, 1)
-        form_layout.addWidget(self.input_acc_name, 2)
-        form_layout.addWidget(self.combo_acc_pkg, 1)
-        form_layout.addWidget(btn_add)
-        layout.addWidget(form_card)
-
-        self.acc_table = QTableWidget()
-        self.acc_table.setColumnCount(8)
-        self.acc_table.setHorizontalHeaderLabels(["ID", "CİHAZ", "KULLANICI ADI", "PAKET", "PROFİL", "WARM-UP", "BEĞENİ", "DURUM"])
-        self.acc_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
-        layout.addWidget(self.acc_table)
-        self.load_accounts_table()
-
-    def load_device_table(self):
-        config_path = "config/devices.json"
-        if not os.path.exists(config_path):
+    def start_natural_report(self):
+        url = self.ent_rep_url.get().strip()
+        if not url or "facebook.com" not in url:
+            self.log("[!] Şikayet edilecek geçerli bir Facebook linki girin!")
             return
-        with open(config_path, "r") as f:
-            devices = json.load(f).get("devices", [])
-        from adbutils import adb
-        connected = [d.serial for d in adb.device_list()]
-        self.device_table.setRowCount(len(devices))
-        for row, dev in enumerate(devices):
-            is_online = dev["serial"] in connected or f"{dev['local_ip']}:5555" in connected
-            self.device_table.setItem(row, 0, QTableWidgetItem(str(dev["id"])))
-            self.device_table.setItem(row, 1, QTableWidgetItem(dev["name"]))
-            self.device_table.setItem(row, 2, QTableWidgetItem(dev["serial"]))
-            self.device_table.setItem(row, 3, QTableWidgetItem(dev["proxy"]))
-            st = QTableWidgetItem("● ONLINE" if is_online else "○ OFFLINE")
-            st.setForeground(QColor("#4ade80" if is_online else "#f43f5e"))
-            self.device_table.setItem(row, 4, st)
+        reason_code = self.cmb_rep_reason.get().split()[0]
+        self.queue_custom_task("SIKAYET_ET", url, reason_code)
+        self.select_tab("tab_campaign")
+        self.run_queue_worker()
 
-    def load_proxy_table(self):
-        config_path = "config/devices.json"
-        if not os.path.exists(config_path):
+    # ==========================================================================
+    # SEKME 6: GRUP & ANAHTAR KELIME NOBETCISI (16 DK / MAX 3 CEVAP)
+    # ==========================================================================
+    def build_tab_watcher(self, parent):
+        card = ctk.CTkFrame(parent, fg_color="#141c2e", corner_radius=12, border_width=1, border_color="#1e293b")
+        card.pack(fill="both", expand=True, padx=6, pady=6)
+
+        ctk.CTkLabel(card, text="🔍 Grup Gönderileri Anahtar Kelime Nöbetçisi (16 Dk Karışık Kontrol | Max 3 Cevap)", font=("Segoe UI", 15, "bold"), text_color="#facc15").pack(anchor="w", padx=20, pady=(14, 4))
+
+        f_grid = ctk.CTkFrame(card, fg_color="#0f1523", corner_radius=10)
+        f_grid.pack(fill="x", padx=20, pady=6)
+        f_grid.grid_columnconfigure(1, weight=1)
+
+        ctk.CTkLabel(f_grid, text="İzlenecek Grup / Gönderi Linki:", font=("Segoe UI", 11, "bold")).grid(row=0, column=0, sticky="w", padx=14, pady=8)
+        self.ent_watch_url = ctk.CTkEntry(f_grid, height=34, corner_radius=8)
+        self.ent_watch_url.insert(0, "https://www.facebook.com/groups/...")
+        self.ent_watch_url.grid(row=0, column=1, sticky="ew", padx=6, pady=8)
+
+        ctk.CTkButton(f_grid, text="➕ Listeye Ekle", width=130, height=34, corner_radius=8, fg_color="#ca8a04", hover_color="#a16207", font=("Segoe UI", 11, "bold"), command=self.add_watched_post).grid(row=0, column=2, padx=4, pady=8)
+        ctk.CTkButton(f_grid, text="🧹 Listeyi Temizle", width=130, height=34, corner_radius=8, fg_color="#475569", hover_color="#334155", font=("Segoe UI", 11), command=self.clear_watched_posts).grid(row=0, column=3, padx=(4, 14), pady=8)
+
+        ctk.CTkLabel(f_grid, text="Anahtar Kelimeler (Virgülle):", font=("Segoe UI", 11, "bold")).grid(row=1, column=0, sticky="w", padx=14, pady=8)
+        self.ent_keywords = ctk.CTkEntry(f_grid, height=34, corner_radius=8)
+        self.ent_keywords.insert(0, "fiyat, link, bilgi, kaç, ne kadar, nerede, dm, ?")
+        self.ent_keywords.grid(row=1, column=1, columnspan=3, sticky="ew", padx=(6, 14), pady=8)
+
+        ctk.CTkLabel(f_grid, text="Otomatik Cevap Metni (+Sayı):", font=("Segoe UI", 11, "bold")).grid(row=2, column=0, sticky="w", padx=14, pady=8)
+        self.ent_kw_reply = ctk.CTkEntry(f_grid, height=34, corner_radius=8)
+        self.ent_kw_reply.insert(0, "Detaylı bilgi ve ürün linki için mesaj kutunuzu kontrol edebilirsiniz")
+        self.ent_kw_reply.grid(row=2, column=1, columnspan=3, sticky="ew", padx=(6, 14), pady=8)
+
+        opt_row = ctk.CTkFrame(card, fg_color="transparent")
+        opt_row.pack(fill="x", padx=20, pady=8)
+
+        ctk.CTkLabel(opt_row, text="Kontrol Periyodu (Dakika):", font=("Segoe UI", 12, "bold")).pack(side="left", padx=(0, 8))
+        self.ent_cycle_min = ctk.CTkEntry(opt_row, width=65, height=34, justify="center", font=("Segoe UI", 12, "bold"))
+        self.ent_cycle_min.insert(0, "16")
+        self.ent_cycle_min.pack(side="left", padx=(0, 24))
+
+        ctk.CTkLabel(opt_row, text="Gönderi Başına Max Cevap Sayısı:", font=("Segoe UI", 12, "bold")).pack(side="left", padx=(0, 8))
+        self.ent_max_rep = ctk.CTkEntry(opt_row, width=65, height=34, justify="center", font=("Segoe UI", 12, "bold"))
+        self.ent_max_rep.insert(0, "3")
+        self.ent_max_rep.pack(side="left", padx=(0, 24))
+
+        ctk.CTkButton(
+            opt_row, text="▶️ Karışık Nöbetçi Motorunu Başlat", height=38, width=260, corner_radius=8,
+            fg_color="#d97706", hover_color="#b45309", font=("Segoe UI", 12, "bold"),
+            command=self.start_keyword_watcher
+        ).pack(side="right")
+
+        self.lbl_watch_count = ctk.CTkLabel(card, text="İzlenen Gönderi Listesi (0 Adet):", font=("Segoe UI", 12, "bold"), text_color="#38bdf8")
+        self.lbl_watch_count.pack(anchor="w", padx=20, pady=(4, 4))
+
+        self.txt_watched_list = ctk.CTkTextbox(card, height=130, fg_color="#0b0f19", text_color="#cbd5e1", font=("Consolas", 11), corner_radius=8)
+        self.txt_watched_list.pack(fill="both", expand=True, padx=20, pady=(0, 12))
+
+    # ==========================================================================
+    # SEKME 7: AKILLI HESAP ISITMA MERKEZI
+    # ==========================================================================
+    def build_tab_warmup(self, parent):
+        card = ctk.CTkFrame(parent, fg_color="#141c2e", corner_radius=12, border_width=1, border_color="#1e293b")
+        card.pack(fill="both", expand=True, padx=10, pady=10)
+
+        ctk.CTkLabel(card, text="🔥 Biyometrik Facebook Hesap Isıtma & Donma Kurtarıcı Stüdyosu", font=("Segoe UI", 16, "bold"), text_color="#facc15").pack(anchor="w", padx=24, pady=(20, 6))
+        ctk.CTkLabel(
+            card,
+            text="Cihazlar dikey modda ana akışta insan gibi gezinir ve beğeni bırakır. Isıtma bittiğinde Facebook ve TikTok kapatılıp ekran uyutulur.",
+            justify="left", font=("Segoe UI", 12), text_color="#94a3b8"
+        ).pack(anchor="w", padx=24, pady=(0, 20))
+
+        form = ctk.CTkFrame(card, fg_color="#0f1523", corner_radius=12)
+        form.pack(fill="x", padx=24, pady=10)
+
+        r1 = ctk.CTkFrame(form, fg_color="transparent")
+        r1.pack(fill="x", padx=20, pady=16)
+
+        ctk.CTkLabel(r1, text="Isıtma Oturum Süresi (Dakika):", font=("Segoe UI", 13, "bold")).pack(side="left", padx=(0, 10))
+        self.ent_warm_min = ctk.CTkEntry(r1, width=80, height=36, justify="center", font=("Segoe UI", 13, "bold"))
+        self.ent_warm_min.insert(0, "30")
+        self.ent_warm_min.pack(side="left", padx=(0, 30))
+
+        ctk.CTkLabel(r1, text="Organik Gönderi Beğeni Oranı (%):", font=("Segoe UI", 13, "bold")).pack(side="left", padx=(0, 10))
+        self.ent_warm_like = ctk.CTkEntry(r1, width=80, height=36, justify="center", font=("Segoe UI", 13, "bold"))
+        self.ent_warm_like.insert(0, "15")
+        self.ent_warm_like.pack(side="left", padx=(0, 30))
+
+        self.var_auto_warm = tk.BooleanVar(value=False)
+        ctk.CTkSwitch(
+            r1, text="Panel Açıldığında Boştaki Cihazları Otomatik Isıtmaya Al",
+            variable=self.var_auto_warm, font=("Segoe UI", 12, "bold")
+        ).pack(side="left", padx=10)
+
+        btn_row = ctk.CTkFrame(card, fg_color="transparent")
+        btn_row.pack(fill="x", padx=24, pady=16)
+
+        ctk.CTkButton(
+            btn_row, text="▶️ Seçili Tüm Cihazları Şimdi Isıtmaya Al", height=44, width=300, corner_radius=10,
+            fg_color="#16a34a", hover_color="#15803d", font=("Segoe UI", 13, "bold"),
+            command=self.start_selected_warmup
+        ).pack(side="left", padx=(0, 12))
+
+        ctk.CTkButton(
+            btn_row, text="📴 Isıtmayı Durdur & Ekranları Kapat", height=44, width=260, corner_radius=10,
+            fg_color="#e11d48", hover_color="#be123c", font=("Segoe UI", 13, "bold"),
+            command=self.stop_and_sleep_all
+        ).pack(side="left")
+
+    # ==========================================================================
+    # YARDIMCI FONKSIYONLAR
+    # ==========================================================================
+    def log(self, msg):
+        line = time.strftime("%H:%M:%S") + "  " + str(msg) + "\n"
+        self.txt_log.insert("end", line)
+        self.txt_log.see("end")
+
+    def select_only_online(self):
+        for w in self.row_widgets.values():
+            w["chk"].set(bool(w["serial_val"]))
+
+    def get_selected_online_nodes(self):
+        nodes = []
+        for i, w in self.row_widgets.items():
+            if w["chk"].get() and w["serial_val"]:
+                nodes.append((i, f"NODE-{i:02d}", w["serial_val"], w["name"].get().strip(), w["persona"].get().strip()))
+        return nodes
+
+    def save_all_profiles(self):
+        for i, w in self.row_widgets.items():
+            self.profiles[f"NODE-{i:02d}"] = {
+                "fb_name": w["name"].get().strip(),
+                "proxy": w["proxy"].get().strip(),
+                "persona": w["persona"].get().strip()
+            }
+        save_json(PROF_FILE, self.profiles)
+        self.log("[KAYDEDİLDİ] Tüm Facebook İsim Soyisim, Proxy ve Persona DNA ayarları kaydedildi.")
+
+    def refresh_devices(self):
+        threading.Thread(target=self._refresh_devices_bg, daemon=True).start()
+
+    def _refresh_devices_bg(self):
+        subprocess.run("adb reconnect offline", shell=True, capture_output=True)
+        out = subprocess.check_output("adb devices", shell=True, text=True).strip().splitlines()[1:]
+        connected = [l.split()[0] for l in out if len(l.split()) >= 2 and l.split()[1] == "device"]
+
+        self.lbl_kpi_nodes.configure(text=f"{len(connected)} / 25 Online")
+        for i in range(1, 26):
+            w = self.row_widgets[i]
+            if i <= len(connected):
+                ser = connected[i - 1]
+                w["serial_val"] = ser
+                lock_portrait_mode(ser)
+                vpn_ok, level, temp = check_vpn_and_temp(ser)
+                vpn_tag = "VPN:OK" if vpn_ok else "VPN:YOK"
+                st_color = "#4ade80" if vpn_ok else "#facc15"
+                w["ser"].configure(text=ser, text_color="#f8fafc")
+                w["st"].configure(text=f"● ON | {vpn_tag} | {int(temp)}°C", text_color=st_color)
+            else:
+                w["serial_val"] = None
+                w["ser"].configure(text=f"BEKLIYOR_NODE_{i:02d}", text_color="#64748b")
+                w["st"].configure(text="○ OFFLINE", text_color="#f87171")
+        self.log(f"[TARAMA & DİKEY KİLİT] {len(connected)} cihaz eşleştirildi ve dikey (Portrait) moda sabitlendi.")
+
+    def lock_all_portrait(self):
+        def _bg():
+            for _, _, ser, _, _ in self.get_selected_online_nodes():
+                lock_portrait_mode(ser)
+            self.log("[📱 DİKEY KİLİT] Tüm cihazlar dikey (Portrait) ekran moduna kilitlendi.")
+        threading.Thread(target=_bg, daemon=True).start()
+
+    def sleep_single_device(self, idx):
+        ser = self.row_widgets[idx]["serial_val"]
+        if not ser:
             return
-        with open(config_path, "r") as f:
-            devices = json.load(f).get("devices", [])
-        self.proxy_table.setRowCount(len(devices))
-        for row, dev in enumerate(devices):
-            self.proxy_table.setItem(row, 0, QTableWidgetItem(str(dev["id"])))
-            self.proxy_table.setItem(row, 1, QTableWidgetItem(dev["name"]))
-            self.proxy_table.setItem(row, 2, QTableWidgetItem(dev["local_ip"]))
-            self.proxy_table.setItem(row, 3, QTableWidgetItem(dev["proxy"]))
+        def _bg():
+            home_and_sleep(ser)
+            self.log(f"[📴 CİHAZ KAPATILDI] NODE-{idx:02d} arka plan FB/TikTok kapatıldı ve telefon ekranı uyutuldu.")
+        threading.Thread(target=_bg, daemon=True).start()
 
-    def load_accounts_table(self):
-        if not os.path.exists(DB_PATH):
+    def open_single_screen(self, idx):
+        ser = self.row_widgets[idx]["serial_val"]
+        if not ser:
+            self.log(f"[!] NODE-{idx:02d} USB'de bağlı değil!")
             return
-        conn = sqlite3.connect(DB_PATH)
-        c = conn.cursor()
-        c.execute("SELECT id, device_id, fb_username, app_package, profile_slot, warmup_level, daily_likes, status FROM fb_accounts")
-        rows = c.fetchall()
-        conn.close()
-        self.acc_table.setRowCount(len(rows))
-        for r_idx, r in enumerate(rows):
-            for c_idx, val in enumerate(r):
-                self.acc_table.setItem(r_idx, c_idx, QTableWidgetItem(str(val)))
+        self.close_single_screen(idx)
+        fb_name = self.row_widgets[idx]["name"].get().strip()
+        col, row = (idx - 1) % 7, (idx - 1) // 7
+        x, y = 10 + col * 265, 25 + row * 340
+        port = 27183 + idx
+        wake_and_home(ser)
+        cmd = f'scrcpy -s {ser} -p {port} --no-audio --window-title "NODE-{idx:02d} | {fb_name} ({ser})" --window-x {x} --window-y {y} --window-width 255 --window-height 310 --max-size 640 --max-fps 15 -b 1M'
+        self.scrcpy_procs[idx] = subprocess.Popen(cmd, shell=True)
+        self.log(f"[EKRAN AÇILDI] NODE-{idx:02d} ({fb_name})")
 
-    def add_facebook_account(self):
-        dev_id = self.input_acc_device.text().strip()
-        username = self.input_acc_name.text().strip()
-        pkg = self.combo_acc_pkg.currentText()
-        if not dev_id or not username:
-            QMessageBox.warning(self, "Uyarı", "Cihaz ID ve Kullanıcı Adı girin!")
+    def close_single_screen(self, idx):
+        ser = self.row_widgets[idx]["serial_val"]
+        if os.name == "nt":
+            subprocess.run(f'taskkill /F /FI "WINDOWTITLE eq NODE-{idx:02d}*" /T', shell=True, capture_output=True)
+        elif ser:
+            subprocess.run(f'pkill -f "scrcpy.*{ser}"', shell=True, capture_output=True)
+        if idx in self.scrcpy_procs:
+            try: self.scrcpy_procs[idx].terminate()
+            except: pass
+
+    def open_selected_screens(self):
+        selected = self.get_selected_online_nodes()
+        self.log(f"[*] Seçili {len(selected)} cihazın ekranı PC'de açılıyor...")
+        def _bg():
+            for idx, _, _, _, _ in selected:
+                self.open_single_screen(idx)
+                time.sleep(0.55)
+        threading.Thread(target=_bg, daemon=True).start()
+
+    def close_all_screens(self):
+        if os.name == "nt":
+            subprocess.run("taskkill /F /IM scrcpy.exe /T", shell=True, capture_output=True)
+        else:
+            subprocess.run("pkill -f scrcpy", shell=True, capture_output=True)
+        self.scrcpy_procs.clear()
+        self.log("[*] PC'deki tüm izleme pencereleri kapatıldı.")
+
+    def mute_all_connected(self):
+        def _bg():
+            for _, _, ser, _, _ in self.get_selected_online_nodes():
+                mute_device_audio(ser)
+            self.log("[🔇 SES KAPATILDI] Tüm aktif cihazların sesleri sıfırlandı.")
+        threading.Thread(target=_bg, daemon=True).start()
+
+    def sleep_all_connected(self):
+        def _bg():
+            for _, _, ser, _, _ in self.get_selected_online_nodes():
+                home_and_sleep(ser)
+            self.log("[📴 CİHAZ EKRANLARI KAPATILDI] Tüm telefonlarda Facebook & TikTok kapatıldı, ana sayfaya dönülüp ekranlar uyutuldu.")
+        threading.Thread(target=_bg, daemon=True).start()
+
+    def stop_and_sleep_all(self):
+        self.stop_active_proc()
+        self.sleep_all_connected()
+
+    def _stream_cmd(self, cmd):
+        self.stop_active_proc()
+        proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, bufsize=1)
+        self.active_proc = proc
+        for line in proc.stdout:
+            self.log(line.strip())
+        self.refresh_queue_table()
+
+    def start_selected_warmup(self):
+        selected = self.get_selected_online_nodes()
+        if not selected:
+            self.log("[!] Isıtma için seçili ONLINE cihaz yok!")
             return
-        conn = sqlite3.connect(DB_PATH)
-        c = conn.cursor()
-        c.execute(
-            "INSERT INTO fb_accounts (device_id, fb_username, app_package, profile_slot, warmup_level, status) VALUES (?, ?, ?, 'MAIN', 1, 'ACTIVE')",
-            (int(dev_id), username, pkg)
-        )
-        conn.commit()
-        conn.close()
-        self.input_acc_device.clear()
-        self.input_acc_name.clear()
-        self.load_accounts_table()
-        self.refresh_kpis()
-        self.log_console.append(f"[CRM] Yeni hesap eklendi: {username}")
+        mins = self.ent_warm_min.get().strip() or "30"
+        lprob = self.ent_warm_like.get().strip() or "15"
+        ser_list = ",".join([x[2] for x in selected])
+        self.log(f"[HESAP ISITMA] {len(selected)} cihaz {mins} dk dikey modda Facebook ısıtmaya alındı...")
+        threading.Thread(target=self._stream_cmd, args=([sys.executable, "core_engine.py", "warmup", mins, lprob, ser_list],), daemon=True).start()
 
-    def refresh_agent_report(self):
-        rep = ManagerAgent.get_fleet_report()
-        if hasattr(self, "dash_agent_box"):
-            self.dash_agent_box.setPlainText(rep)
+    def start_single_warmup(self, idx):
+        ser = self.row_widgets[idx]["serial_val"]
+        if not ser: return
+        mins = self.ent_warm_min.get().strip() or "30"
+        lprob = self.ent_warm_like.get().strip() or "15"
+        self.log(f"[TEKİL ISITMA] NODE-{idx:02d} ({ser}) {mins} dk ısıtmaya alındı...")
+        threading.Thread(target=self._stream_cmd, args=([sys.executable, "core_engine.py", "warmup", mins, lprob, ser],), daemon=True).start()
 
-    def start_bot_process(self):
-        self.btn_start_bot.setEnabled(False)
-        self.log_console.append("[INFO] Kampanya & Biyometrik görev motoru başlatılıyor...")
-        self.bot_thread = BotRunnerThread()
-        self.bot_thread.log_signal.connect(self.append_log)
-        self.bot_thread.start()
+    def queue_custom_task(self, task_mode, url, comment_label):
+        self.save_all_profiles()
+        selected = self.get_selected_online_nodes()
+        if not selected:
+            self.log("[!] Görev atanacak seçili ONLINE cihaz bulunamadı!")
+            return
+        if self.var_rand_order.get():
+            random.shuffle(selected)
+        wmin = int(self.ent_wmin.get().strip() or "5")
+        wmax = int(self.ent_wmax.get().strip() or "14")
+        camp_code = f"CMP-{random.randint(1000, 9999)}"
 
-    def append_log(self, text):
-        self.log_console.append(text)
-        if "tamamlandı" in text.lower() or "tamamlandi" in text.lower():
-            self.btn_start_bot.setEnabled(True)
-            self.refresh_agent_report()
-            self.refresh_kpis()
-            self.load_campaign_queue_table()
+        db = sqlite3.connect(DB_FILE)
+        c = db.cursor()
+        for idx, node_id, ser, fb_name, persona in selected:
+            delay_s = random.randint(wmin, wmax)
+            c.execute("""INSERT INTO campaign_queue
+                (camp_code, node_id, serial, fb_name, persona, task_type, target_url, comment_text, delay_sec, status)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                (camp_code, node_id, ser, fb_name, persona, task_mode, url, comment_label, delay_s, f"[PENDING] {comment_label}"))
+        db.commit()
+        db.close()
+        self.refresh_queue_table()
 
-    def open_all_scrcpy(self):
-        self.log_console.append("[SCRCPY] Bağlı cihaz ekranları açılıyor...")
-        subprocess.Popen(["scrcpy", "--max-size", "600", "--max-fps", "25"])
+    def queue_and_run(self, task_mode):
+        if task_mode == "YORUM+BEGENI":
+            url = self.ent_post_url.get().strip()
+            base_title = self.ent_comm_title.get().strip() or "Harika paylaşım"
+            self.save_all_profiles()
+            selected = self.get_selected_online_nodes()
+            if not selected: return
+            if self.var_rand_order.get(): random.shuffle(selected)
+            wmin = int(self.ent_wmin.get().strip() or "5")
+            wmax = int(self.ent_wmax.get().strip() or "14")
+            camp_code = f"CMP-{random.randint(1000, 9999)}"
+            db = sqlite3.connect(DB_FILE)
+            c = db.cursor()
+            for idx, node_id, ser, fb_name, persona in selected:
+                delay_s = random.randint(wmin, wmax)
+                numbered_comment = f"{base_title} #{self.comment_counter}"
+                self.comment_counter += 1
+                c.execute("""INSERT INTO campaign_queue
+                    (camp_code, node_id, serial, fb_name, persona, task_type, target_url, comment_text, delay_sec, status)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                    (camp_code, node_id, ser, fb_name, persona, task_mode, url, numbered_comment, delay_s, f"[PENDING] {numbered_comment}"))
+            db.commit()
+            db.close()
+            self.refresh_queue_table()
+        elif task_mode == "GRUP_KATIL":
+            self.queue_custom_task("GRUP_KATIL", self.ent_grp_url.get().strip(), "Gruba Katıl")
+        else:
+            self.queue_custom_task("KISI_EKLE", self.ent_frd_url.get().strip(), "Arkadaş Ekle")
 
-    def send_telegram_alert(self):
-        from telegram_alerts import TelegramAlerts
-        TelegramAlerts.send_mission_report(45, 0)
-        self.log_console.append("[TELEGRAM] Operasyon özeti gönderildi.")
+        self.run_queue_worker()
 
-    def trigger_kill_switch(self):
-        from kill_switch import KillSwitch
-        KillSwitch.emergency_stop_device("NODE-01")
-        self.log_console.append("[KILL-SWITCH] Acil ağ izolasyonu devreye alındı!")
+    def run_queue_worker(self):
+        sw_flag = "1" if self.var_sandwich.get() else "0"
+        threading.Thread(target=self._stream_cmd, args=([sys.executable, "core_engine.py", "run_queue", sw_flag],), daemon=True).start()
 
+    def load_watch_cfg(self):
+        return load_json("config/watched_posts.json", {"posts": [], "keywords": "fiyat, link, bilgi", "reply_template": "Detayli bilgi icin DM kontrol edin", "cycle_minutes": 16, "max_replies_per_visit": 3})
+
+    def refresh_watched_list_ui(self):
+        cfg = self.load_watch_cfg()
+        posts = cfg.get("posts", [])
+        self.lbl_watch_count.configure(text=f"İzlenen Gönderi Listesi ({len(posts)} Adet):")
+        self.txt_watched_list.delete("1.0", "end")
+        for idx, p in enumerate(posts, 1):
+            self.txt_watched_list.insert("end", f"{idx:02d}. {p}\n")
+
+    def add_watched_post(self):
+        url = self.ent_watch_url.get().strip()
+        if not url or "facebook.com" not in url:
+            self.log("[!] Geçerli bir Facebook grup veya gönderi linki girin!")
+            return
+        cfg = self.load_watch_cfg()
+        if url not in cfg["posts"]:
+            cfg["posts"].append(url)
+        save_json("config/watched_posts.json", cfg)
+        self.refresh_watched_list_ui()
+        self.log(f"[EKLENDİ] Gönderi izleme listesine eklendi (Toplam: {len(cfg['posts'])}).")
+
+    def clear_watched_posts(self):
+        cfg = self.load_watch_cfg()
+        cfg["posts"] = []
+        save_json("config/watched_posts.json", cfg)
+        self.refresh_watched_list_ui()
+        self.log("[TEMİZLENDİ] İzlenen gönderi listesi sıfırlandı.")
+
+    def start_keyword_watcher(self):
+        cfg = self.load_watch_cfg()
+        cur_url = self.ent_watch_url.get().strip()
+        if "facebook.com" in cur_url and cur_url not in cfg["posts"]:
+            cfg["posts"].append(cur_url)
+        cfg["keywords"] = self.ent_keywords.get().strip()
+        cfg["reply_template"] = self.ent_kw_reply.get().strip()
+        cfg["cycle_minutes"] = int(self.ent_cycle_min.get().strip() or "16")
+        cfg["max_replies_per_visit"] = int(self.ent_max_rep.get().strip() or "3")
+        cfg["min_wait"] = int(self.ent_wmin.get().strip() or "6")
+        cfg["max_wait"] = int(self.ent_wmax.get().strip() or "15")
+        save_json("config/watched_posts.json", cfg)
+        self.refresh_watched_list_ui()
+
+        selected = self.get_selected_online_nodes()
+        if not selected:
+            self.log("[!] Kontrol için seçili ONLINE cihaz yok!")
+            return
+        ser_list = ",".join([x[2] for x in selected])
+        threading.Thread(target=self._stream_cmd, args=([sys.executable, "keyword_watcher.py", ser_list],), daemon=True).start()
+
+    def start_telegram_pipeline(self):
+        self.save_group_selections()
+        selected_group_urls = [g["url"] for g in self.saved_groups if g.get("selected")]
+        if not selected_group_urls:
+            self.log("[!] Lütfen yukarıdaki Facebook Grup Butonlarından en az 1 tanesini seçin!")
+            return
+        self.run_telegram_to_targets(",".join(selected_group_urls))
+
+    def run_telegram_to_targets(self, targets_csv):
+        tg_url = self.ent_tg_url.get().strip()
+        prod_title = self.ent_prod_title.get().strip()
+        prod_link = self.ent_prod_link.get().strip()
+        aw_flag = "1" if self.var_tg_autowatch.get() else "0"
+
+        selected = self.get_selected_online_nodes()
+        if not selected:
+            self.log("[!] Paylaşım için seçili ONLINE cihaz yok!")
+            return
+        ser_list = ",".join([x[2] for x in selected])
+        self.log(f"[TELEGRAM POST MOTORU] Görsel + Başlık + Link indiriliyor -> Seçili {len(targets_csv.split(','))} hedefe paylaşılacak...")
+        threading.Thread(
+            target=self._stream_cmd,
+            args=([sys.executable, "telegram_pipeline.py", tg_url, targets_csv, prod_title, prod_link, ser_list, aw_flag],),
+            daemon=True
+        ).start()
+
+    def refresh_queue_table(self):
+        for item in self.tree_q.get_children():
+            self.tree_q.delete(item)
+        db = sqlite3.connect(DB_FILE)
+        c = db.cursor()
+        rows = c.execute("SELECT id, node_id, fb_name, persona, task_type, delay_sec, status FROM campaign_queue ORDER BY id DESC LIMIT 80").fetchall()
+        pending_cnt = c.execute("SELECT COUNT(*) FROM campaign_queue WHERE status LIKE '%PENDING%'").fetchone()[0]
+        db.close()
+        self.lbl_kpi_queue.configure(text=f"{pending_cnt} Görev")
+        for r in rows:
+            self.tree_q.insert("", "end", values=(f"#{r[0]}", r[1], r[2], r[3], r[4], f"T+{r[5]}sn", r[6]))
+
+    def clear_queue_table(self):
+        db = sqlite3.connect(DB_FILE)
+        db.execute("DELETE FROM campaign_queue")
+        db.commit()
+        db.close()
+        self.comment_counter = 1
+        self.refresh_queue_table()
+        self.log("[TEMİZLENDİ] Görev kuyruğu sıfırlandı.")
+
+    def stop_active_proc(self):
+        if self.active_proc:
+            try: self.active_proc.terminate()
+            except: pass
+        self.log("[⏹️ DURDURULDU] Aktif arka plan görevi sonlandırıldı.")
+
+    def periodic_ui_sync(self):
+        try:
+            self.refresh_queue_table()
+            self.refresh_watched_list_ui()
+        except:
+            pass
+        self.after(4000, self.periodic_ui_sync)
+
+    def auto_warmup_on_startup(self):
+        if not self.var_auto_warm.get():
+            return
+        db = sqlite3.connect(DB_FILE)
+        pending_cnt = db.execute("SELECT COUNT(*) FROM campaign_queue WHERE status LIKE '%PENDING%'").fetchone()[0]
+        db.close()
+        if pending_cnt == 0 and (not self.active_proc or self.active_proc.poll() is not None):
+            self.start_selected_warmup()
 
 if __name__ == "__main__":
-    app = QApplication(sys.argv)
-    window = MainWindow()
-    window.show()
-    sys.exit(app.exec())
+    app = AutoFarmModernCommandCenter()
+    app.mainloop()

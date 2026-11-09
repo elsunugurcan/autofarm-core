@@ -1,0 +1,214 @@
+{
+  "devices": [
+    {
+      "id": 1,
+      "name": "node-01",
+      "serial": "TKUW99U8QCNNJ7RC",
+      "local_ip": "192.168.1.101",
+      "proxy": "socks5://user:pass@127.0.0.1:1081"
+    },
+    {
+      "id": 2,
+      "name": "node-02",
+      "serial": "BEKLIYOR_NODE_02",
+      "local_ip": "192.168.1.102",
+      "proxy": "socks5://user:pass@127.0.0.1:1082"
+    },
+    {
+      "id": 3,
+      "name": "node-03",
+      "serial": "BEKLIYOR_NODE_03",
+      "local_ip": "192.168.1.103",
+      "proxy": "socks5://user:pass@127.0.0.1:1083"
+    },
+    {
+      "id": 4,
+      "name": "node-04",
+      "serial": "BEKLIYOR_NODE_04",
+      "local_ip": "192.168.1.104",
+      "proxy": "socks5://user:pass@127.0.0.1:1084"
+    },
+    {
+      "id": 5,
+      "name": "node-05",
+      "serial": "BEKLIYOR_NODE_05",
+      "local_ip": "192.168.1.105",
+      "proxy": "socks5://user:pass@127.0.0.1:1085"
+    },
+    {
+      "id": 6,
+      "name": "node-06",
+      "serial": "BEKLIYOR_NODE_06",
+      "local_ip": "192.168.1.106",
+      "proxy": "socks5://user:pass@127.0.0.1:1086"
+    },
+    {
+      "id": 7,
+      "name": "node-07",
+      "serial": "BEKLIYOR_NODE_07",
+      "local_ip": "192.168.1.107",
+      "proxy": "socks5://user:pass@127.0.0.1:1087"
+    },
+    {
+      "id": 8,
+      "name": "node-08",
+      "serial": "BEKLIYOR_NODE_08",
+      "local_ip": "192.168.1.108",
+      "proxy": "socks5://user:pass@127.0.0.1:1088"
+    },
+    {
+      "id": 9,
+      "name": "node-09",
+      "serial": "BEKLIYOR_NODE_09",
+      "local_ip": "192.168.1.109",
+      "proxy": "socks5://user:pass@127.0.0.1:1089"
+    },
+    {
+      "id": 10,
+      "name": "node-10",
+      "serial": "BEKLIYOR_NODE_10",
+      "local_ip": "192.168.1.110",
+      "proxy": "socks5://user:pass@127.0.0.1:1090"
+    },
+    {
+      "id": 11,
+      "name": "node-11",
+      "serial": "BEKLIYOR_NODE_11",
+      "local_ip": "192.168.1.111",
+      "proxy": "socks5://user:pass@127.0.0.1:1091"
+    },
+    {
+      "id": 12,
+      "name": "node-12",
+      "serial": "BEKLIYOR_NODE_12",
+      "local_ip": "192.168.1.112",
+      "proxy": "socks5://user:pass@127.0.0.1:1092"
+    },
+    {
+      "id": 13,
+      "name": "node-13",
+      "serial": "BEKLIYOR_NODE_13",
+      "local_ip": "192.168.1.113",
+      "proxy": "socks5://user:pass@127.0.0.1:1093"
+    },
+    {
+      "id": 14,
+      "name": "node-14",
+      "serial": "BEKLIYOR_NODE_14",
+      "local_ip": "192.168.1.114",
+      "proxy": "socks5://user:pass@127.0.0.1:1094"
+    },
+    {
+      "id": 15,
+      "name": "node-15",
+      "serial": "BEKLIYOR_NODE_15",
+      "local_ip": "192.168.1.115",
+      "proxy": "socks5://user:pass@127.0.0.1:1095"
+    },
+    {
+      "id": 16,
+      "name": "node-16",
+      "serial": "BEKLIYOR_NODE_16",
+      "local_ip": "192.168.1.116",
+      "proxy": "socks5://user:pass@127.0.0.1:1096"
+    },
+    {
+      "id": 17,
+      "name": "node-17",
+      "serial": "BEKLIYOR_NODE_17",
+      "local_ip": "192.168.1.117",
+      "proxy": "socks5://user:pass@127.0.0.1:1097"
+    },
+    {
+      "id": 18,
+      "name": "node-18",
+      "serial": "BEKLIYOR_NODE_18",
+      "local_ip": "192.168.1.118",
+      "proxy": "socks5://user:pass@127.0.0.1:1098"
+    },
+    {
+      "id": 19,
+      "name": "node-19",
+      "serial": "BEKLIYOR_NODE_19",
+      "local_ip": "192.168.1.119",
+      "proxy": "socks5://user:pass@127.0.0.1:1099"
+    },
+    {
+      "id": 20,
+      "name": "node-20",
+      "serial": "BEKLIYOR_NODE_20",
+      "local_ip": "192.168.1.120",
+      "proxy": "socks5://user:pass@127.0.0.1:1100"
+    },
+    {
+      "id": 21,
+      "name": "node-21",
+      "serial": "BEKLIYOR_NODE_21",
+      "local_ip": "192.168.1.121",
+      "proxy": "socks5://user:pass@127.0.0.1:1101"
+    },
+    {
+      "id": 22,
+      "name": "node-22",
+      "serial": "BEKLIYOR_NODE_22",
+      "local_ip": "192.168.1.122",
+      "proxy": "socks5://user:pass@127.0.0.1:1102"
+    },
+    {
+      "id": 23,
+      "name": "node-23",
+      "serial": "BEKLIYOR_NODE_23",
+      "local_ip": "192.168.1.123",
+      "proxy": "socks5://user:pass@127.0.0.1:1103"
+    },
+    {
+      "id": 24,
+      "name": "node-24",
+      "serial": "BEKLIYOR_NODE_24",
+      "local_ip": "192.168.1.124",
+      "proxy": "socks5://user:pass@127.0.0.1:1104"
+    },
+    {
+      "id": 25,
+      "name": "node-25",
+      "serial": "BEKLIYOR_NODE_25",
+      "local_ip": "192.168.1.125",
+      "proxy": "socks5://user:pass@127.0.0.1:1105"
+    },
+    {
+      "id": 26,
+      "name": "node-26",
+      "serial": "BEKLIYOR_NODE_26",
+      "local_ip": "192.168.1.126",
+      "proxy": "socks5://user:pass@127.0.0.1:1106"
+    },
+    {
+      "id": 27,
+      "name": "node-27",
+      "serial": "BEKLIYOR_NODE_27",
+      "local_ip": "192.168.1.127",
+      "proxy": "socks5://user:pass@127.0.0.1:1107"
+    },
+    {
+      "id": 28,
+      "name": "node-28",
+      "serial": "BEKLIYOR_NODE_28",
+      "local_ip": "192.168.1.128",
+      "proxy": "socks5://user:pass@127.0.0.1:1108"
+    },
+    {
+      "id": 29,
+      "name": "node-29",
+      "serial": "BEKLIYOR_NODE_29",
+      "local_ip": "192.168.1.129",
+      "proxy": "socks5://user:pass@127.0.0.1:1109"
+    },
+    {
+      "id": 30,
+      "name": "node-30",
+      "serial": "BEKLIYOR_NODE_30",
+      "local_ip": "192.168.1.130",
+      "proxy": "socks5://user:pass@127.0.0.1:1110"
+    }
+  ]
+}
