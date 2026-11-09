@@ -1,4 +1,8 @@
 import sys, os, json, subprocess, threading, time, random, sqlite3
+try:
+    subprocess.run("git pull --rebase --autostash origin main", shell=True, capture_output=True, timeout=10)
+except Exception:
+    pass
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 sys.path.insert(0, os.path.abspath("."))
 
