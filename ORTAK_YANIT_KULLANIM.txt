@@ -1,0 +1,30 @@
+ORTAK YANITLANDI KAYDI
+
+Bu özellik mevcut nöbetçinin izleme/inceleme kayıtları için eklendi. Otomatik Facebook yanıtı göndermez.
+
+1. Nöbetçi Takip Ekranı > Anahtar Kelime Eşleşmeleri bölümünü açın.
+2. İlgili kayda çift tıklayın.
+3. Yanıtlandı Olarak Kaydet düğmesine basın.
+4. Orijinal yorumun Facebook bağlantısını ve yanıtı veren hesabımızın adını girin. Bağlantıda comment_id olmalı; yalnız gönderi/grup bağlantısı yeterli değildir.
+5. İsterseniz verilmiş yanıtın bağlantısını da ekleyin; aynı orijinal yoruma ait olmalıdır.
+6. Yanıtı Facebook'ta gördüğünüzü doğrulayan kutuyu işaretleyip kaydedin.
+
+Kaydın durumu Yanıtlandı (elle doğrulandı) olur. Yanıtlayan hesap, kayıt zamanı ve bağlantılar ayrıntıda görünür. Bu kayıtta taslak kopyalama kapatılır. Yanlış işaretlediyseniz ayrıntıdaki Yanıtlandı İşaretini Geri Al düğmesini kullanın; değişiklik geçmişi korunur.
+
+KURAL
+
+- Ortak kayıt kişi adına veya 'link' metnine değil, orijinal yorumun kimliğine bağlıdır.
+- Aynı yorum kimliği başka telefondan geldiğinde yeni inceleme kaydı sayılmaz; yanıtlandı durumu korunur.
+- Aynı kişi yeni bir yorum yazarsa o yorum ayrı kimlikle değerlendirilir.
+- Başka kişi aynı metni yazarsa yorum kimliği farklı olduğu sürece elenmez.
+- Gönderi izleme listesinden çıkarılmaz; yeni yorum ve eşleşmeler izlenmeye devam eder.
+
+ÖNEMLİ SINIR
+
+Mevcut telefon ekranı tarayıcısı çoğu zaman yalnız görünür metni okuyabiliyor; güvenilir yorum kimliği veya yazar vermiyor. Bu durumda sistem, Facebook'taki bir yanıtı kendi kendine tanıyıp 'biz cevap verdik' sonucuna varmaz. Yanıt kaydı elle bağlanmalıdır. Yeni ekran metninin aynı yorum olduğu doğrulanamıyorsa otomatik elenmez; benzer yanıt kaydı var uyarısıyla incelemeye bırakılır. Böylece aynı 'link' metnini yazan farklı kişiler yanlışlıkla engellenmez.
+
+Dolayısıyla bu güncelleme Facebook'taki bütün eski yanıtların otomatik tespitini veya çok hesaptan otomatik cevap engellemesini gerçekleştirmez. İzleme ve ortak inceleme kaydını yönetir; önceki yalnız-izleme çalışma şekli devam eder.
+
+Kayıtlar aynı bilgisayardaki bütün bağlı telefonların kullandığı watcher_history.db içinde kalıcıdır. Ayrı bilgisayarlara veritabanı eşitlemesi eklenmedi. Programı kapatıp açmak kaydı silmez.
+
+23 nöbetçi testi ve gerçek arayüzde doğrulama kutusu/kayıt/durum güncelleme kontrolleri geçti. Gerçek Facebook yanıtı gönderilmedi veya platformda canlı otomatik yanıt tespiti yapılmadı.

@@ -8,3 +8,21 @@ apks/*.apk
 *.apk
 *.log
 .DS_Store
+
+# Local accounts, settings and runtime artifacts
+config/*.json
+!config/*.example.json
+*.db
+*.db-*
+*.sqlite
+*.sqlite3
+.env
+.env.*
+!.env.example
+backups/
+logs/*
+!logs/.gitkeep
+share_history_media/
+kanitlar/
+hata_ekranlari/
+TEST_VE_IYILESTIRME_RAPORU.md

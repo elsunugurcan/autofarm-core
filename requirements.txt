@@ -10,3 +10,5 @@ python-telegram-bot
 opencv-python
 pillow
 PyQt6
+
+customtkinter

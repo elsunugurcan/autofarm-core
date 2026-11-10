@@ -1,0 +1,24 @@
+﻿AUTOFARM v7.5 — SIRALI NÖBETÇİ VE PAYLAŞIM
+
+Kurulum yapıldı. Açık panel varsa kapatıp yeniden açın.
+
+NÖBETÇİ
+1. Grup & Kelime Nöbetçisi bölümünde gönderileri, anahtar kelimeleri ve yanıt metnini girin.
+2. Kullanılacak telefonları seçin. Her telefonun gerçek Facebook hesap adı kayıtlı olmalı.
+3. Otomatik Yanıt ve Sıralı ve dengeli dağıtım seçeneklerini açın. Hedeflerin yönetiminizde olduğunu doğrulayın.
+4. Yanıtlar arası saniye alanına istediğiniz bekleme süresini yazın.
+5. Gönderi başına tur sınırını ayarlayın. Örneğin bir turda 10 istek için sınır 10 olmalı; eski 3 sınırı kalırsa o turda en fazla 3 deneme yapılır.
+6. Nöbetçiyi Başlat / Devam Et düğmesine basın.
+
+Yorumlar önce okunur, uygun istekler seçili ONLINE telefonlara dengeli dağıtılır. 10 uygun yorum ve 5 uygun telefon örneğinde 2'şer görev verilir. View reply göstergesi olan yorumlar atlanır. Seçili telefon çevrimdışı kalırsa henüz gönderilmemiş işler uygun diğer seçili telefonlara verilir. Başlangıçta seçilmemiş cihaz kendiliğinden eklenmez.
+
+Belirlediğiniz süre iki yanıt denemesi arasındaki ek beklemedir. Gönderiyi açma, doğrulama ve açıksa 30 saniyelik ön ısınma ayrıca zaman alır. Başlatılmış nöbetçinin ayarlarını değiştirmek için durdurup yeni ayarla başlatın.
+
+GRUP / SAYFA PAYLAŞIMI
+Görsel, yazı, hedefler ve telefonları seçip paylaşımı başlatın. Her hedef bir kez sıraya alınır. Yeterli uygun telefon varsa 5 grup 5 farklı telefona dağıtılır; daha az telefon varsa sıra dengeli tekrar kullanılır. Telefonlar arası süre Grup & Sayfa Merkezi zamanlama alanındadır. Mevcut görsel seçme ve paylaşım doğrulama akışı korunmuştur.
+
+KAPATIP AÇMA / DEVAM ETME
+Panel açılması görevi veya günlük ısınmayı otomatik başlatmaz. Kayıtlı Paylaşım Sıraları / Devam Et veya nöbetçi bekleyen sıralar düğmesinden kayıtları inceleyin; Seçili Sırayı Başlat / Devam Et ile siz başlatın. Yalnız WAITING işler devam eder. UNKNOWN: kesildiği için gönderim durumu belirsiz; mükerrer gönderim olmasın diye tekrar denenmez. Böyle kayıtları Facebook üzerinden elle kontrol edin. Görseller sıranın devamı için yerel olarak saklanır.
+
+SINIRLAR VE KONTROL
+169 yerel otomatik test ve Tk arayüz kontrolü geçti. Canlı Facebook gönderimi yapılmadı. Gerçek telefon ekranında son kontrol kullanıcı tarafından yapılmalıdır. Nöbetçi mevcut tarama sınırında görülen yorumları okuyabilir; tüm geçmiş yorumların bulunduğu garanti edilmez. Yerel eşleştirme gönderi bağlantısı/yazar/metne dayanır; Facebook yorum kimliği her ekranda alınamaz. Aynı gönderi için aynı bağlantıyı kullanın. Yayın doğrulanamıyorsa program başarı iddiasında bulunmaz ve kendiliğinden tekrar göndermez.

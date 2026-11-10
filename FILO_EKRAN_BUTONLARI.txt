@@ -1,0 +1,23 @@
+FİLO EKRAN BUTONLARI — GÜNCELLEME
+
+Filo Cihaz Yönetimi bölümünde Tüm ONLINE Ekranları Aç eklendi.
+
+- Seçim kutularına veya daha önce yapılmış taramaya bağlı değildir; ADB'deki o anda ONLINE telefonları yeniden bulur.
+- Telefon ekranlarını PC'de açar. Ekranları monitöre göre ızgara yerleştirir; 14 ve 25 pencere düzeni kontrol edildi.
+- Telefonu uyandırır ama ana ekrana götürmez; bulunduğunuz uygulama korunur.
+- Bu oturumun zaten açık izleme pencereleri yeniden çoğaltılmaz. scrcpy açılmazsa hata ve cihazın logs/scrcpy_...log dosyası konsolda belirtilir.
+- Filo taraması yapılmamışsa doğrulanmamış NODE/hesap adı yerine seri numarası kullanılır. Hesap etiketlerinin görünmesi için önce Cihazları Tara kullanın.
+
+KIRMIZI TÜM CİHAZ EKRANLARINI & FB/TT KAPAT DÜZELTİLDİ
+
+Önceki buton yalnız seçilmiş ve önceden taranmış telefonları kullanıyordu. Şimdi bütün ONLINE telefonları doğrudan ADB'den bulur.
+
+Çalışan görev ve nöbetçi önce durdurulur; görev açma/kapatma kilidiyle kapanış sırasında yeni bir görev başlatılması engellenir. Facebook ve iki TikTok paketine kapatma komutu, ana ekran ve ekran uyutma komutu gönderilir. Sonrasında güç durumu okunur. Cihaz başına doğrulama ve hata konsolda görünür; doğrulanmamış sonuç başarılı diye yazılmaz.
+
+Bu buton fiziksel telefon ekranı ve FB/TikTok içindir. PC izleme pencerelerini kapatma işlemi ayrı düğmededir. Sol Cihaz Araçları menüsündeki Seçili Telefonları Uyut ise seçili telefonlara yönelik olarak korunmuştur.
+
+KONTROLLER
+
+7 ADB/süreç/ızgara testi ve gerçek arayüzde düğme bağlantısı testi geçti. Seçim yokken ve tarama verisi boşken iki ONLINE telefona gitmesi, önce görev durdurması, cihaz başına farklı sonuçları göstermesi, scrcpy komutunun güvenli argümanlarla verilmesi, yinelenen pencereyi açmaması ve kapanırken yeni görevi engellemesi taklit cihazlarla doğrulandı. Modern arayüzün 21 bölüm/boyut kontrolü de geçti.
+
+Kullanıcının isteğiyle canlı test ona bırakıldı. Gerçek telefonlarda bu güncelleme için ekran açma, uygulama kapatma veya uyutma işlemi yapılmadı. İlk canlı denemede Canlı Operasyon konsolunu açıp cihaz başına sonucu kontrol edin.

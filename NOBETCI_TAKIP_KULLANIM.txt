@@ -1,0 +1,40 @@
+NÖBETÇİ TAKİP EKRANI — KULLANIM
+
+Kurulum tamamlandı. Terminal işlemi yapmanız gerekmiyor.
+
+1. AutoFarm'da Grup & Kelime Nöbetçisi bölümüne girin.
+2. Geçerli bir Facebook grup veya gönderi bağlantısını izleme listesine ekleyin.
+3. Anahtar kelimeleri ve elle kullanacağınız yanıt taslağını yazın.
+4. Nöbetçi Telefonları listesinden kullanacağınız ONLINE telefonları seçin.
+5. Kontrol periyodunu ve her hedef için yeni eşleşme sınırını ayarlayın.
+6. Nöbetçiyi Başlat (Yalnız İzleme) düğmesine basın.
+7. Nöbetçi Takip Ekranı kendiliğinden açılır. Sonradan aynı adlı düğmeyle tekrar açabilirsiniz.
+
+NEREDEN KONTROL EDİLİR?
+
+- Kontrol Geçmişi: Hangi NODE/seri numarasının hangi hedefe baktığı, kayıtlı hesap adı, zaman, sonuç, yeni eşleşme sayısı.
+- Anahtar Kelime Eşleşmeleri: Görünür ekranda bulunan metin, eşleşen kelime, ilk/son görülme ve inceleme durumu.
+- Bir kayda çift tıklayın: Açıklamalar ve yanıt taslağı açılır. Taslağı veya hedef bağlantısını kopyalayabilirsiniz. İnceledim düğmesi yalnız inceleme durumunu değiştirir.
+- Üst durum: Kontrol ediliyor, sonraki tur bekleniyor, durduruldu veya hata. Sonraki kontrol saati bekleme sırasında gösterilir.
+- Canlı Operasyon konsolu: Kısa ilerleme ve hata mesajları.
+- Nöbetçiyi Durdur: Bekleme hemen kesilir; o anki cihaz okumasının sonlanması gerekebilir. Bu arayüzden başlatılan işçi 12 saniyede durmazsa süreç ağacı sonlandırılır; son kontrol yarıda kesildi olarak kaydedilir.
+
+ÇALIŞMA SINIRLARI
+
+Bu sürüm yalnız izleme ve insan tarafından inceleme içindir. Otomatik yorum, beğeni, yanıt veya DM göndermez. Yanıtı inceleyip Facebook'tan kendiniz göndermelisiniz. Gönderilmiş yanıt sayısı veya doğrulanmış yorum sahibi uydurulmaz.
+
+Telefonun erişilebilirlik ekranında görülebilen metinler en fazla üç ekran boyunca okunur. Bu, bütün yorumların okunduğu veya bulunan metnin kesin olarak bir yorum olduğu anlamına gelmez. Facebook hedef görünümü açılamazsa ya da giriş ekranı görünürse hata kaydedilir; giriş/doğrulama işlemi yapılmaz. Kontrol aralığı her tur tamamlandıktan sonra başlar. Hedefler seçilen telefonlara sırayla dağıtılır; her hedef bütün telefonlarda tekrar tekrar taranmaz.
+
+VPN tüneli ve batarya sıcaklığı kontrol edilir. OFFLINE, VPN kapalı, sıcak veya sıcaklığı okunamayan telefonlarda hedef açılmaz. tun0 tünelinin bulunması gerçek proxy çıkışının doğru olduğunu kanıtlamaz.
+
+Hesap adı, filo tablosundaki kayıtlı etikettir; Facebook'tan doğrulanmış hesap kimliği değildir. Aynı hedefte aynı ekran metni tekrar görüldüğünde yeni kayıt yerine son görülme güncellenir. Yorum kimliği/kişi doğrulanamadığı için aynı metni yazan farklı kişiler ayrı yorum olarak ayırt edilemez. Anahtar kelimeler virgülle ayrılır; kelime ve ifade eşleştirmesi Türkçe büyük/küçük harfleri dikkate alır. Genel '*' kullanılabilir; bu durumda bütün uygun görünür metinler aday sayılır.
+
+GEÇMİŞ VE AYARLAR
+
+Kayıtlar proje klasöründeki watcher_history.db dosyasında, izleme ayarları config/watched_posts.json içinde saklanır. Program kapanıp açıldığında geçmiş korunur; yeni izleme için telefonları yeniden seçin. Daha Eski Kayıtlar düğmesi 200'er kayıt daha yükler. Projeyi yedeklerken bu dosyaları da alın. Eski eksik sürümde hiç kaydedilmemiş kontroller geriye dönük oluşturulmaz.
+
+İzleme ile başka cihaz görevi aynı anda başlatılmaz. Yeni görev için önce nöbetçiyi durdurun. Görsel paylaşımı sonrası izleme seçeneği başlangıçta kapalıdır; kendiniz açarsanız yalnız izleme motoru çalışır.
+
+DOĞRULAMA
+
+16 nöbetçi testi, önceki 19 görsel/paylaşım-geçmişi testi ve gerçek Tk arayüzü kontrolleri geçti. Kontroller seçilen telefon sınırını, kalıcı kayıtları, yinelenen eşleşmeleri, hata/iptali, takip tablosunu ve taslak inceleme akışını kapsıyor. Gerçek telefonda tarama veya Facebook'ta yanıt gönderme yapılmadı; gerçek Facebook arayüzünün görünür metinleri sağlayabilmesi ilk kullanımda kontrol edilmelidir.

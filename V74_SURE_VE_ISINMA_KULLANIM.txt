@@ -1,0 +1,18 @@
+AUTOFARM v7.4 — SÜRE VE ISINMA AYARLARI
+
+Programı yeniden açın. Kampanya Dağıtıcı, Grup & Sayfa Merkezi, Şikayet Merkezi ve Grup & Kelime Nöbetçisi bölümlerinde birbirinden bağımsız Cihaz/görev arası (sn), Önce 30 sn ısınma ve Isınma beğeni (%) alanları vardır.
+
+1. Minimum ve maksimum saniyeyi girin. Örnek:10 ve20, sonraki cihaz/görevden önce bu aralıktan bir bekleme seçer. İlk görevden önce ve son görevden sonra fazladan cihaz aralığı beklenmez. Aynı cihazdaki farklı hedefler arasında da aralık uygulanır.
+2. Önce30 sn ısınma anahtarı açıkken görevden önce ana sayfa açılıp30 saniye gezinilir. Ekran/ağ çağrıları toplam süreyi biraz uzatabilir.
+3. Isınma beğeni oranı uygun bir beğeni fırsatında uygulanır. Bir ön ısınmada en fazla rastgele1–2 beğeni denemesi yapılır; daha önce beğenilmiş öğeler yeniden tıklanmaz. Uygun düğme yoksa veya olasılık seçmezse daha az olabilir. %0 beğeniyi kapatır, gezinme kalır. Ana görevin beğeni/yorum oranından ayrıdır.
+4. Ayarları Kaydet kalıcı saklar. Görevi başlatmak da ayarı kaydeder ve o göreve sabitler. Sonradan değişiklik, başlamış kampanyanın kopyasını değiştirmez.
+5. Kampanya grubuna katılma/arkadaş işlemleri kampanya ayarını; Grup & Sayfa Merkezi'ndeki katılma/takip/paylaşımlar merkez ayarını; şikayet kendi bölümünün ayarını kullanır.
+6. Nöbetçinin otomatik yanıtında tek telefon kuralı korunur; aralık hedefler arasında uygulanır. Salt okuma modunda ön ısınma beğeni atmaz.
+7. Hesap Isıtma Merkezi'ndeki günlük beğeni oranını0–100 ayarlayın; Isınma Ayarlarını Kaydet ile saklanır. Bu alan, görev öncesi ısınma oranından ayrıdır. Mevcut ısıtma oturumu ve donma kurtarması çalışmaya devam eder.
+8. Basit yorum havuzu hazırdır ve düzenlenebilir. Taslak Seç/Kopyala rastgele bir metni panoya alır; kendi incelemenizle kullanırsınız. Rastgele ana sayfa gönderilerine toplu otomatik yorum eklenmedi.
+
+KORUNAN KONTROLLER
+Telefon seçimleri, kampanya beğeni/yorum oranları, Gallery/Done/Post akışı, paylaşım sonrası kontrol, Spam alt kategorisi ve alındı onayı, yanıtsız yorum seçimi,16–30s gönderim beklemesi,25 kontrol donma eşiği ve görev sonu Facebook kapatma mantıkları korunmuştur. Eski görevler, hedefler, hesaplar ve geçmişler silinmedi. Yeni campaign_timing tablosu yalnız yeni görev başlatılırken ayar kopyası için oluşturulur.
+
+DOĞRULAMA
+14 test grubunda151 test geçti; gerçek Tk arayüzündeki Nöbetçi/süre-kopyası kontrolü de geçti. Telefon ve gönderim çağrıları taklit edildi. Canlı beğeni, yorum, paylaşım veya şikayet başlatılmadı. İlk canlı kontrolde tek cihazla süreler ve kapanış gözlenmelidir.

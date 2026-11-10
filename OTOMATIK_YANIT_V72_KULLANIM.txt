@@ -1,0 +1,48 @@
+AUTOFARM v7.2 — TEK HESAPLI FİYAT / LİNK YANITI
+
+Bu sürümde yalnız izleme moduna ek olarak, kendi yönettiğiniz grup/gönderiler için tek seçili telefondan otomatik yanıt akışı vardır. Telefon Facebook arayüzü İngilizce olarak ele alınır. Çok hesapla yanıt dağıtımı veya hesap değiştirme yoktur.
+
+BAŞLATMA
+
+1. Filo Cihaz Yönetimi > Cihazları Tara.
+2. Kullanacağınız telefonun Facebook hesap adı alanına gerçek görünen hesap adını yazın ve kaydedin. 'FB Hesap 01' örnek etiketi otomatik yanıt için kabul edilmez.
+3. Grup & Kelime Nöbetçisi bölümüne girin. Kendinize ait gönderiyi izleme listesine ekleyin; ilk denemede yalnız bir test gönderisi kullanın.
+4. Anahtar kelimelere fiyat, link yazın. Yanıt Metni alanına gerçekten gönderilecek cevabı yazın.
+5. Otomatik Yanıt (tek telefon / English Facebook) anahtarını açın ve hedeflerin yönetiminizde olduğunu belirten kutuyu işaretleyin.
+6. Nöbetçi Telefonları listesinde yalnız bir ONLINE telefon seçin. Sınırı ilk denemede 1 yapın (üst sınır 3); periyot en az 1 dakikadır.
+7. Nöbetçiyi Başlat düğmesine basın. İlk kontrol hemen yapılır; sonraki tur periyodu ilk tur bittikten sonra başlar.
+8. Nöbetçi Takip Ekranı > Otomatik Yanıt Kayıtları ekranını ve Facebook'taki gerçek sonucu birlikte kontrol edin.
+
+GÖNDERİM ŞARTLARI
+
+Yalnız yazarı, metni ve tek Reply düğmesi aynı yorum bloğunda açıkça eşleşen yorum ele alınır. Reply tıklandıktan sonra yanıt yazma alanında aynı kişiye ait Replying to / Reply to alıcısı aranır. Metin yazıldıktan sonra birebir doğrulanır. Son olarak o yanıt alanına ait tek Send düğmesi bulunursa tıklanır. Alanlar belirsizse veya Durdur istendiyse gönderim yapılmaz. Sabit ekran koordinatları ya da rastgele bir Reply/Send düğmesi kullanılmaz.
+
+YINELENEN YANIT KORUMASI
+
+Her gönderi yolu + yorum yazarı + yorum metni birleşimi için ortak bir gönderim rezervasyonu tutulur. Aynı kayıt başka turda tekrar gönderilmez. Bu sistem yerel watcher_history.db içinde kalıcıdır. Sonucu belirsiz olan veya başarısız görünen kayıtlar otomatik yeniden denenmez.
+
+Facebook yorum kimliği native ekran yapısında her zaman bulunmadığından bu eşleştirme gerçek comment_id ile aynı değildir. Aynı isimde farklı kişiler veya aynı kişinin aynı gönderide aynı metni yeniden yazması ayırt edilemeyebilir; tekrar göndermek yerine atlanabilir. Başka bir paylaşım bağlantısıyla aynı gönderinin izlenmesi de tekilleştirmeyi etkileyebilir. İlk kullanımda yalnız bir gönderi bağlantısı kullanın.
+
+SON KURAL: View 1 reply / View replies göstergesi bulunan yorumlara yanıt gönderilmez; kimin yanıtladığına bakılmaz. Sistemin önceki denemeleri de yeniden gönderilmez. Açık kayıtlı hesap adıyla eşleşen kendi yorumlarımıza yanıt verilmez. Gönderi takibi durmaz, yeni uygun yorumlar izlenir.
+
+SONUÇLAR
+
+- Hazırlanıyor: yorumun tek gönderim hakkı ayrıldı.
+- Send tetikleniyor: gönderim düğmesi tıklanmak üzere.
+- Gönderim denendi; yayın teyitsiz: Send tıklandı; gerçekten yayınlandığını Facebook'tan kontrol edin.
+- Gönderilmedi: yorum veya alıcı/metin/düğme doğrulanamadı. Açıklamayı okuyun.
+- Sonuç belirsiz; tekrar yok: gönderim sırasında hata/kesinti yaşandı. Facebook'ta kontrol etmeden tekrar göndermeyin.
+- Yorum yapısı doğrulanamadı: sizin Facebook sürümündeki erişilebilirlik yapısı eşleşmedi; yanıt gönderilmedi.
+
+TANI KAYITLARI
+
+Otomatik mod, okuduğu XML ekran yapısını logs/watcher_layout/scan_...xml dosyalarına yerel olarak kaydeder. Bunlar yorum/isim gibi görünür içerikleri içerebilir; program bu dosyaları dışarı göndermez. Eşleştirme başarısız olduğunda bu dosyalar hangi alanın eksik kaldığını incelemeyi sağlar; ekran görüntüsü istemek zorunlu değildir.
+
+SINIRLAR VE KONTROL
+
+20 yeni otomatik yanıt testi; İngilizce yorum satırı, yanlış alıcı engeli, sahte alıcı metnini kabul etmeme, metin doğrulama, tek Send düğmesi, durdurma, tek hesap/sahiplik şartları, kayıt rezervasyonu ve tur tekrarında tekilleştirme kontrollerini kapsar. Mevcut testler ve gerçek Tk arayüzünde yeni mod/ayar/kayıt ekranı kontrolleri de geçti.
+
+Gerçek telefonda gönderim testi yapılmadı. Telefonun Facebook sürümüne özel XML düzeni henüz doğrulanmadı. Dolayısıyla ilk canlı denemede eşleşmeyen bir arayüzde otomatik gönderim engellenebilir; bu durum çalışmış/yayınlanmış gibi gösterilmez. Canlı testleri kullanıcı yapacak. Program açılışta otomatik yanıt başlatmaz; kullanıcı modu açıp telefonu seçerek başlatmalıdır.
+
+KAYITLI ANAHTAR KELIMELER
+Anahtar kelime alanina virgulle ayirarak istediginiz kelimeleri yazin. Enter, alandan cikis veya Kelimeleri Kaydet ile kalici kaydedilir. Kayitli listede Ctrl/Shift ile birden fazla kelime secip Secilenleri Ekle dugmesine basin; cift tik da ekler. Kayitli liste arsivdir; yalniz Anahtar Kelimeler alanindaki kelimeler aranir. Degisikliklerin calisan nobetciye uygulanmasi icin durdurup yeniden baslatin.

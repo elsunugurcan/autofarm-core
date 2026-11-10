@@ -1,0 +1,63 @@
+AUTOFARM-30 v7.1 — SON KONTROLLER VE CANLI TEST SIRASI
+
+KURULAN DEĞİŞİKLİKLER
+
+- Akış donması eşiği: 25 değişmeyen kontrol. İlk ekran başlangıç ölçümüdür; sonraki 25 karşılaştırma aynı kaldığında kurtarma çalışır. Bu, 25 saniye değildir.
+- Ana motor ve stres testi aynı donma politikasını kullanır.
+- Yalnız ilk 650 karakter yerine ekran içeriği karşılaştırılır. Sistem saatinin değişmesi tek başına akışın ilerlediği sayılmaz. Ekran içeriği değişirse sayaç sıfırlanır.
+- Facebook'un arka plana düşmesi, açık internet/ANR hatası ve VPN/sıcaklık korumaları ayrı koşullardır; 25 kontrol beklemeleri gerekmez. Eşik değişikliği bütün kurtarmaların 25 adıma ertelendiği anlamına gelmez.
+- Daha sade koyu tema, sayfa başlığı, gerçek iş durum göstergesi ve 25 kontrol kartı.
+- Pencere açılırken ekran boyutuna ve ölçeklendirmeye uyum sağlar. Uzun form ve tablolar yatay/dikey kaydırmayla erişilebilir.
+- Paylaşım Geçmişi ve Canlı Operasyon başlangıçta kapalıdır. Alt başlıklardan açılır; biri açılınca diğeri kapanarak çalışma alanına yer bırakır. Son log mesajı kapalı konsolun başlığında da görünür.
+- Soldaki Cihaz Araçları açılır menüsünde ekran, uyutma, dikey kilit ve ses kontrolleri bulunur.
+- Cihaz taraması yalnız bağlantı/VPN/sıcaklık durumunu okur; telefon ayarlarını değiştirmez. Dikey kilit ayrıca Cihaz Araçları üzerinden veya ilgili oturum başlatıldığında uygulanır.
+- Tarama ve konsol arka plan güncellemeleri ana arayüz kuyruğundan işlenir.
+
+DOĞRULANANLAR
+
+50 otomatik test geçti:
+13 görsel/paylaşım motoru kontrolü, 6 paylaşım geçmişi kontrolü, 23 nöbetçi/ortak yanıt kaydı kontrolü, 8 donma politikası kontrolü.
+
+Donma testinde gerçek worker fonksiyonu sahte cihaz/saat ile çalıştırıldı: 24 değişmeyen karşılaştırmada yeniden başlatmadı, 25'incide kurtarma çağrısını yaptı. Gerçek telefona komut gönderilmedi.
+
+Gerçek Tk widget testleri: telefon seçimi, kayıtlar, ayrıntılar, yanıt doğrulama formu, durdurma ve ortak kayıtlar geçti. Yedi bölüm 1480x920, 1280x800 ve 1100x700 boyutlarında kontrol edildi (21 bölüm/boyut kontrolü). Açılır paneller, menü, arka plan logu ve taklit ADB taraması kontrol edildi. Kaynak dosyalarının sözdizimi kontrol edildi.
+
+BUNLAR CANLI FACEBOOK BAŞARISI ANLAMINA GELMEZ
+
+Canlı testleri kullanıcı yapacak. Bu güncellemede gerçek telefonda tarama, Facebook gezinmesi, paylaşım, beğeni, yorum, katılım, takip, arkadaşlık veya şikayet işlemi başlatılmadı. Facebook sürümü/dili ve telefon erişilebilirliği, seçicilerin canlı sonucunu etkileyebilir. İşlem kaydı tek başına yayının/etkileşimin gerçekleştiğini kanıtlamaz.
+
+Nöbetçi yalnız görünür metin izleme ve insan tarafından inceleme yapar; otomatik yanıt göndermez. Yanıtlandı kaydı yorum bağlantısıyla elle doğrulanır. Kimliği belirsiz metinler farklı kişiler olabileceğinden otomatik elenmez.
+
+SENİN YAPACAĞIN TEST SIRASI
+
+1. BAĞLANTI
+   Filo Cihaz Yönetimi > Cihazları Tara. Doğru seri numarası, VPN ve sıcaklığı kontrol et. Filo listesindeki ONLINE telefonlardan yalnız test telefonunun kutusunu açık bırak. Bağımsız kampanya/nöbetçi listelerinde de yalnız o telefonu seç.
+
+2. EKRAN VE DONANIM
+   Cihaz Araçları > Seçili Ekranları PC'de Aç. Telefonu doğru NODE/seriyle gördüğünü kontrol et. Dikey kilit, sessize alma ve uyutma kontrollerini ayrı ayrı dene. Uyandırma sırasında doğru telefonun kullanıldığını gözle.
+
+3. NÖBETÇİ
+   Sana ait test gönderisini izleme listesine ekle. Telefonu seç, test anahtar kelimesini gir ve Nöbetçiyi Başlat (Yalnız İzleme) de. Nöbetçi Takibi ekranında doğru seri/hedef/zaman ve sonuç görünmeli. Eşleşme varsa metni incele; bunun tüm yorumların veya yazar kimliğinin doğrulandığı anlamına gelmediğini unutma. Durdur düğmesiyle sonlandır; başka cihaz görevi için önce durmasını bekle.
+
+4. GÖRSEL PAYLAŞIMI
+   Görsel & Grup Paylaşımı sayfasında tek görsel, başlık, sana ait tek test hedefi ve tek telefonla dene. Facebook'taki gerçek sonucu kontrol et. Alt Paylaşım Geçmişi panelini aç; doğru görsel, telefon, hedef ve durum görünmeli. Alınmış bir bağlantı tek başına yayın teyidi değildir.
+
+5. YORUM VE BEĞENİ
+   Kampanya Dağıtıcı'da sana ait test gönderisini kullan. Yorum + Beğeni Telefonları listesinde yalnız test telefonunu seç. Bir deneme yap; yorum/beğeniyi Facebook'tan kontrol et. Görev kuyruğundaki durumla gerçek sonucu karşılaştır. Telefon seçmeden düğmeye basıldığında işlem başlamamalı.
+
+6. ORTAK YANIT KAYDI
+   Hesabından gerçekten yanıt verdiğin orijinal yorumu seç. Nöbetçi eşleşmesinde Yanıtlandı Olarak Kaydet formuna comment_id içeren yorum bağlantısını ve yanıtlayan hesabı gir. Doğrulayıp kaydet. Durum Yanıtlandı olmalı; gönderi izleme listesinde kalmalı. Kimliksiz benzer metinlerin otomatik elenmediğini kontrol et.
+
+7. SAYFA / GRUP / ARKADAŞ İŞLEMLERİ
+   Bunlar yalnız arayüz oluşturma ve seçim açısından kontrol edildi; canlı sonuçları henüz doğrulanmadı. İlgili özelliği, kendi yönettiğin veya test için izin verilen hedefte, tek telefonla ayrı ayrı değerlendir. Kuyruğu ve Facebook'taki gerçek sonucu birlikte kontrol et.
+
+8. ŞİKAYET MERKEZİ
+   Canlı bir hedefe deneme bildirimi gönderilmedi. Gerçek şikayet göndermeden yalnız form, seçim ve iptal akışını kontrol et. Bu özelliğin canlı başarısı doğrulanmış değildir.
+
+9. ISITMA VE DURDURMA
+   Önce tek telefon, 1 dakika, yüzde 0 beğeni ile gezinme/durdurma/uyutma akışını gözle. Donma eşiği 25 kontrol olarak görünmeli. Durdurma düğmesi arka plan görevini durdurur; gerekirse Cihaz Araçları > Seçili Telefonları Uyut ile ekranı ayrıca kapat.
+
+10. KALICILIK
+    Programı kapatıp aç. Grup/sayfa, paylaşım geçmişi, nöbetçi geçmişi ve ortak yanıt kaydı korunmalı. Yeni göreve başlamadan telefonları yeniden seç.
+
+Bir adımda hata çıkarsa sonraki adıma geçmeden hangi bölüm/telefon/hedefte olduğunu ve Canlı Operasyon mesajını paylaş. 'Hepsi çalışıyor' sonucu, canlı adımlar tek tek doğrulanmadan verilmedi.
